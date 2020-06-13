@@ -1,10 +1,16 @@
 /** 
-* @file         aruco_landing.cpp
-* @brief        二维码引导降落
-* @author       lddddd
-* @date         2020.6.8
-* @version      v1.0 
-*/  
+* @file     aruco_landing.cpp
+* @brief    二维码引导降落
+* @details  
+* @note
+* @author   lddddd
+*           Email: lddddd1997@gmail.com
+* @date     2020.6.8
+* @version  1.0
+* @par      Edit history:
+*           1.0: lddddd, 2020.6.8, .
+*/
+
 #include "aruco_landing.h"
 
 void ArucoLanding::ArucoDetectResultCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& _msg)    //订阅二维码位姿

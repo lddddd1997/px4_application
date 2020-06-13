@@ -1,10 +1,15 @@
 /** 
-* @file         gcs_display.cpp
-* @brief        无人机状态显示
-* @author       lddddd
-* @date         2020.6.8
-* @version      v1.0 
-*/  
+* @file     gcs_display.cpp
+* @brief    无人机状态显示
+* @details  
+* @note
+* @author   lddddd
+*           Email: lddddd1997@gmail.com
+* @date     2020.5.24
+* @version  1.0
+* @par      Edit history:
+*           1.0: lddddd, 2020.5.24, .
+*/
 #include "gcs_display.h"
 
 // void GcsDisplay::LoopTimerCallback(const ros::TimerEvent& _event)

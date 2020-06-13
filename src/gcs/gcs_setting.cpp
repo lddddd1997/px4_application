@@ -1,10 +1,17 @@
 /** 
-* @file         gcs_setting.cpp
-* @brief        无人机模式设置
-* @author       lddddd
-* @date         2020.5.24 
-* @version      v1.0 
-*/  
+* @file     gcs_setting.cpp
+* @brief    无人机模式设置
+* @details  
+* @note
+* @author   lddddd
+*           Email: lddddd1997@gmail.com
+* @date     2020.5.24
+* @version  1.0
+* @par      Edit history:
+*           1.0: lddddd, 2020.5.24, .
+*/
+
+
 #include "gcs_setting.h"
 
 // void GcsSetting::LoopTimerCallback(const ros::TimerEvent& _event)

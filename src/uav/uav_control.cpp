@@ -1,10 +1,16 @@
 /** 
-* @file         uav_control.cpp
-* @brief        无人机指令控制
-* @author       lddddd
-* @date         2020.5.24 
-* @version      v1.0 
-*/  
+* @file     uav_control.cpp
+* @brief    无人机指令控制
+* @details  
+* @note
+* @author   lddddd
+*           Email: lddddd1997@gmail.com
+* @date     2020.5.24
+* @version  1.0
+* @par      Edit history:
+*           1.0: lddddd, 2020.5.24, .
+*/
+
 #include "uav_control.h"
 
 // void UavControl::LoopTimerCallback(const ros::TimerEvent& _event)
