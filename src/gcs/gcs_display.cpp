@@ -58,6 +58,16 @@ void GcsDisplay::UavCommandCallback(const px4_application::UavCommand::ConstPtr&
     command_reception_ = *_msg;
 }
 
+void GcsDisplay::EstimatorStatusCallback(const mavros_msgs::EstimatorStatus::ConstPtr& _msg)
+{
+    estimator_status_uav_ = *_msg;
+}
+
+void GcsDisplay::ExtendedStateCallback(const mavros_msgs::ExtendedState::ConstPtr& _msg)
+{
+    extended_state_uav_ = *_msg;
+}
+
 float GcsDisplay::GetTimePassSec(void)
 {
     ros::Time current_time = ros::Time::now();
@@ -80,6 +90,8 @@ void GcsDisplay::LoopTask(void)
 void GcsDisplay::Initialize(void)
 {
     begin_time_ = ros::Time::now();
+    current_state_uav_.mode = "UNKNOWN";
+    command_reception_.task_name = "UNKNOWN";
     //loop_timer_ = nh_.createTimer(ros::Duration(loop_period_), &GcsDisplay::LoopTimerCallback, this);
     uav_state_sub_ = nh_.subscribe<mavros_msgs::State>("/mavros/state",
                                                         10,
@@ -101,6 +113,16 @@ void GcsDisplay::Initialize(void)
                                                      &GcsDisplay::UavImuCallback,
                                                       this,
                                                        ros::TransportHints().tcpNoDelay());
+    uav_estimator_sub_ = nh_.subscribe<mavros_msgs::EstimatorStatus>("/mavros/estimator_status",
+                                                                      10,
+                                                                       &GcsDisplay::EstimatorStatusCallback,
+                                                                        this,
+                                                                         ros::TransportHints().tcpNoDelay());
+    uav_extended_state_sub_ = nh_.subscribe<mavros_msgs::ExtendedState>("/mavros/extended_state",
+                                                                         10,
+                                                                          &GcsDisplay::ExtendedStateCallback,
+                                                                           this,
+                                                                            ros::TransportHints().tcpNoDelay());
     uav_command_sub_ = nh_.subscribe<px4_application::UavCommand>("/px4_application/uav_command",
                                                                    10,
                                                                     &GcsDisplay::UavCommandCallback,
@@ -109,7 +131,7 @@ void GcsDisplay::Initialize(void)
 }
 void GcsDisplay::UavStateDisplay(void)
 {
-    std::cout << "------------------------------State Info-------------------------------" << std::endl;
+    std::cout << "---------------------------------State Info----------------------------------" << std::endl;
     //固定的浮点显示
     std::cout.setf(std::ios::fixed);
     //setprecision(n) 设显示小数精度为n位
@@ -121,27 +143,64 @@ void GcsDisplay::UavStateDisplay(void)
     // 强制显示符号
     std::cout.setf(std::ios::showpos);
 
-    std::cout << "Time: " << GetTimePassSec() << " [s] ";
+    std::cout << "Time:" << std::setw(8) << GetTimePassSec() << " [s] ";
 
     //是否和飞控建立起连接
-    if (current_state_uav_.connected == true)
+    // if (current_state_uav_.connected == true)
+    // {
+    //     std::cout << " [ Connected ] ";
+    // }
+    // else
+    // {
+    //     std::cout << " [ Unconnected ] ";
+    // }
+
+    std::cout << (current_state_uav_.connected ? " [ Connected ] " : " [ Unconnected ] ");
+    //是否上锁
+    // if (current_state_uav_.armed == true)
+    // {
+    //     std::cout << " [ Armed ] ";
+    // }
+    // else
+    // {
+    //     std::cout << " [ DisArmed ] ";
+    // }
+    std::cout << (current_state_uav_.armed ? " [ Armed ] " : " [ DisArmed ] ");
+    std::cout << " [ " << current_state_uav_.mode <<" ] ";
+    std::string flight_state;
+    switch(extended_state_uav_.landed_state)
     {
-        std::cout << "  [ Connected ]  ";
-    }
-    else
-    {
-        std::cout << " [ Unconnected ]  ";
+        case mavros_msgs::ExtendedState::LANDED_STATE_UNDEFINED: flight_state = "UNDEFINED"; break;
+        case mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND: flight_state = "ON_GROUND"; break;
+        case mavros_msgs::ExtendedState::LANDED_STATE_IN_AIR: flight_state = "IN_FLIGHT"; break;
+        case mavros_msgs::ExtendedState::LANDED_STATE_TAKEOFF: flight_state = "TAKEOFF"; break;
+        case mavros_msgs::ExtendedState::LANDED_STATE_LANDING: flight_state = "LANDING"; break;
+        default : flight_state = "UNDEFINED"; break;
     }
 
-    //是否上锁
-    if (current_state_uav_.armed == true)
-    {
-        std::cout << "  [ Armed ]   ";
-    }
-    else
-    {
-        std::cout << "  [ DisArmed ]   ";
-    }
+    std::cout << " [ " << flight_state << " ] " << std::endl;
+
+    std::cout << "Estimated Status:  ";
+    std::cout << "Attitude   " << (estimator_status_uav_.attitude_status_flag ? "[√]   " : "[X]   ")
+               << "Vel Horiz Rel " << (estimator_status_uav_.velocity_horiz_status_flag ? "[√]   " : "[X]   ") 
+                << "Vel Verti Rel " << (estimator_status_uav_.velocity_vert_status_flag ? "[√]   " : "[X]   ") << std::endl;
+
+
+    std::cout << "                   ";
+    std::cout << "Accel      " << (estimator_status_uav_.accel_error_status_flag ? "[X]   " : "[√]   ")
+               << "Pos Verti Rel " << (estimator_status_uav_.pos_vert_agl_status_flag ? "[√]   " : "[X]   ") 
+                << "Pos Verti Abs " << (estimator_status_uav_.pos_vert_abs_status_flag ? "[√]   " : "[X]   ") << std::endl;
+
+    std::cout << "                   ";
+    std::cout << "Gps Glitch " << (estimator_status_uav_.gps_glitch_status_flag ? "[√]   " : "[X]   ")
+               << "Pos Horiz Rel " << (estimator_status_uav_.pos_horiz_rel_status_flag ? "[√]   " : "[X]   ") 
+                << "Pos Horiz Abs " << (estimator_status_uav_.pos_horiz_abs_status_flag ? "[√]   " : "[X]   ") << std::endl;
+
+    std::cout << "                   ";
+    std::cout << "Const Mode " << (estimator_status_uav_.const_pos_mode_status_flag ? "[√]   " : "[X]   ")
+               << "pre Horiz Rel " << (estimator_status_uav_.pred_pos_horiz_rel_status_flag ? "[√]   " : "[X]   ") 
+                << "pre Horiz Abs " << (estimator_status_uav_.pred_pos_horiz_abs_status_flag ? "[√]   " : "[X]   ") << std::endl;
+
     const double RAD2DEG = 57.295779513082320876846364344191;
     std::string frame_name;
     if(command_reception_.frame_id == px4_application::UavCommand::LOCAL)
@@ -156,24 +215,24 @@ void GcsDisplay::UavStateDisplay(void)
     {
         frame_name = " [ERROR]";
     }
-
-    std::cout << " [ " << current_state_uav_.mode <<" ]   " << std::endl;
-    std::cout << "-------------------------Navigation Info [ENU]-------------------------" << std::endl;
-    std::cout << "FCU Position    [X Y Z] : " << std::setw(8) << local_position_uav_.x << " [ m ] " << std::setw(8) << local_position_uav_.y << " [ m ] " << std::setw(8) << local_position_uav_.z << " [ m ] " << std::endl;
-    std::cout << "FCU Velocity    [X Y Z] : " << std::setw(8) << local_velocity_uav_.x << " [m/s] " << std::setw(8) << local_velocity_uav_.y << " [m/s] " << std::setw(8) << local_velocity_uav_.z << " [m/s] " << std::endl;
-    std::cout << "----------------------------Alltitude Info-----------------------------" << std::endl;
-    std::cout << "Alltitude Angle [R P Y] : " << std::setw(8) << attitude_angle_uav_.x * RAD2DEG << " [ ° ] " << std::setw(8) << attitude_angle_uav_.y * RAD2DEG << " [ ° ] " << std::setw(8) << attitude_angle_uav_.z * RAD2DEG << " [ ° ] " << std::endl;
-    std::cout << "Alltitude Rate  [R P Y] : " << std::setw(8) << attitude_rate_uav_.x  * RAD2DEG << " [°/s] " << std::setw(8) << attitude_rate_uav_.y  * RAD2DEG << " [°/s] " << std::setw(8) << attitude_rate_uav_.z  * RAD2DEG << " [°/s] " << std::endl;
-    std::cout << "----------------------------Command" << frame_name << "----------------------------" << std::endl;
+    int setw_num = 9;
+    std::cout << "----------------------------Navigation Info [ENU]----------------------------" << std::endl;
+    std::cout << "FCU Position    [X Y Z] : " << std::setw(setw_num) << local_position_uav_.x << " [ m ] " << std::setw(setw_num) << local_position_uav_.y << " [ m ] " << std::setw(setw_num) << local_position_uav_.z << " [ m ] " << std::endl;
+    std::cout << "FCU Velocity    [X Y Z] : " << std::setw(setw_num) << local_velocity_uav_.x << " [m/s] " << std::setw(setw_num) << local_velocity_uav_.y << " [m/s] " << std::setw(setw_num) << local_velocity_uav_.z << " [m/s] " << std::endl;
+    std::cout << "--------------------------------Attitude Info--------------------------------" << std::endl;
+    std::cout << "Attitude Angle  [R P Y] : " << std::setw(setw_num) << attitude_angle_uav_.x * RAD2DEG << " [ ° ] " << std::setw(setw_num) << attitude_angle_uav_.y * RAD2DEG << " [ ° ] " << std::setw(setw_num) << attitude_angle_uav_.z * RAD2DEG << " [ ° ] " << std::endl;
+    std::cout << "Attitude Rate   [R P Y] : " << std::setw(setw_num) << attitude_rate_uav_.x  * RAD2DEG << " [°/s] " << std::setw(setw_num) << attitude_rate_uav_.y  * RAD2DEG << " [°/s] " << std::setw(setw_num) << attitude_rate_uav_.z  * RAD2DEG << " [°/s] " << std::endl;
+    std::cout << "-------------------------------Command" << frame_name << "-------------------------------" << std::endl;
     std::cout << "Period: " << command_reception_.period  << " [s] " << " [ " << command_reception_.task_name << " ] ";
-    if (command_reception_.update == true)
-    {
-        std::cout << " [ active ] ";
-    }
-    else
-    {
-        std::cout << "  [ dead ]  ";
-    }
+    // if (command_reception_.update == true)
+    // {
+    //     std::cout << " [ active ] ";
+    // }
+    // else
+    // {
+    //     std::cout << "  [ dead ]  ";
+    // }
+    std::cout << (command_reception_.update ? " [ ACTIVE ] " : "  [ DEAD ]  ");
     switch(command_reception_.xyz_id)
     {
         case px4_application::UavCommand::PX_PY_PZ:
@@ -201,9 +260,14 @@ void GcsDisplay::UavStateDisplay(void)
             std::cout << " [ PX_VY_VZ ] ";
             break;
         }
+        case px4_application::UavCommand::PX_PY_VZ:
+        {
+            std::cout << " [ PX_PY_VZ ] ";
+            break;
+        }
         default:     
         {
-            std::cout << " [ Error ] ";
+            std::cout << " [ ERROR ] ";
             break;
         }
     }
@@ -226,13 +290,13 @@ void GcsDisplay::UavStateDisplay(void)
         }
         default:     
         {
-            std::cout << " [ Error ] ";
+            std::cout << " [ ERROR ] ";
             break;
         }
     }
     std::cout << std::endl;
-    std::cout << "Command Reception : " << std::setw(8) << command_reception_.x << " [X]" << std::setw(8) << command_reception_.y << " [Y]"
-               << std::setw(8) << command_reception_.z << " [Z]" << std::setw(8) << command_reception_.yaw << " [Yaw]" << std::endl;
+    std::cout << "Command Reception : " << std::setw(setw_num) << command_reception_.x << " [X]" << std::setw(setw_num) << command_reception_.y << " [Y]"
+               << std::setw(8) << command_reception_.z << " [Z]" << std::setw(setw_num) << command_reception_.yaw << " [Yaw]" << std::endl;
     std::cout << std::endl;
 
     CommandUpdateReset();

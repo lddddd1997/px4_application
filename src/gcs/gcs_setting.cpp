@@ -10,8 +10,6 @@
 * @par      Edit history:
 *           1.0: lddddd, 2020.5.24, .
 */
-
-
 #include "gcs_setting.h"
 
 // void GcsSetting::LoopTimerCallback(const ros::TimerEvent& _event)
@@ -32,7 +30,7 @@ void GcsSetting::LoopTask(void)
 void GcsSetting::Initialize(void)
 {
     control_mode_ = "POSCTL";
-    armed_cmd_ = true;
+    armed_cmd_ = false;
     
     // loop_timer_ = nh_.createTimer(ros::Duration(loop_period_), &GcsSetting::LoopTimerCallback, this);
     uav_state_sub_ = nh_.subscribe<mavros_msgs::State>("/mavros/state",
@@ -48,13 +46,13 @@ void GcsSetting::ModeSelect(void)
     int select_flag;
     int mode_flag;
     uint8_t timeout_count;
-    std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>gcs control<<<<<<<<<<<<<<<<<<<<<<<<<<<<< "<< std::endl;
+    std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>gcs control<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " << std::endl;
     std::cout << "Input the selection:  0 for set mode,1 for arm or disarm..." << std::endl;
     std::cin >> select_flag;
 
     if(select_flag == 0)
     {
-        std::cout << "Input the mode:  0 for set _OFFBOARD_,1 for _POSCTL_" << std::endl;
+        std::cout << "Input the mode:  0 for set _OFFBOARD_,1 for _POSCTL_,2 for _AUTO.RTL_,3 for _AUTO.LAND_" << std::endl;
         std::cin >> mode_flag;
         switch(mode_flag)
         {
@@ -62,12 +60,16 @@ void GcsSetting::ModeSelect(void)
 
             case 1: control_mode_ = "POSCTL"; break;
 
+            case 2: control_mode_ = "AUTO.RTL"; break;
+
+            case 3: control_mode_ = "AUTO.LAND"; break;
+
             default:std::cout << "Input error,please retry..." << std::endl; std::cout << std::endl; break;
         }
-        if(mode_flag < 2)    //暂时设置两种模式
+        if(mode_flag < 4)    //暂时设置四种模式
         {
             timeout_count= 0;
-            std::cout << "Setting to "<<control_mode_<<" Mode..." << std::endl;
+            std::cout << "Setting to " << control_mode_ << " Mode..." << std::endl;
             ros::spinOnce();
             while(current_state_uav_.mode != control_mode_)
             {
@@ -81,9 +83,9 @@ void GcsSetting::ModeSelect(void)
                     break;
             }
             if(timeout_count > 20)
-                std::cout << "Set to "<<control_mode_<<" Mode Timeout!!!" << std::endl;
+                std::cout << "Set to " << control_mode_ << " Mode Timeout!!!" << std::endl;
             else
-                std::cout << "Set to "<<control_mode_<<" Mode Susscess!!!" << std::endl;
+                std::cout << "Set to " << control_mode_ << " Mode Susscess!!!" << std::endl;
             std::cout << std::endl;
         } 
     }

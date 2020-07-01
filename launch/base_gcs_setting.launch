@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="px4_application" type="gcs_setting" name="gcs_setting" output="screen" />
+</launch>

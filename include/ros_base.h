@@ -4,6 +4,8 @@
 #include <ros/ros.h>
 #include <iostream>
 
+
+
 class RosBase
 {
 public:
@@ -18,14 +20,21 @@ private:
     ros::Timer loop_timer_;
     double loop_period_;
     void LoopTimerCallback(const ros::TimerEvent& event);
+    virtual void Initialize(void);
 };
 
 RosBase::RosBase(const ros::NodeHandle& _nh, const double _period):nh_(_nh), loop_period_(_period)
 {
     loop_timer_ = nh_.createTimer(ros::Duration(loop_period_), &RosBase::LoopTimerCallback, this);
+    Initialize();
 }
 
 RosBase::~RosBase()
+{
+    
+}
+
+void RosBase::Initialize(void)
 {
     
 }

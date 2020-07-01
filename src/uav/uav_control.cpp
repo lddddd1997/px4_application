@@ -49,7 +49,7 @@ void UavControl::CommandExecution(void)
 {
     if(!command_reception_.update)    //如果指令没更新，则退出
         return;
-    switch(command_reception_.xyz_id)
+    switch(command_reception_.xyz_id)    //注：建议在位置速度组合控制时，使用VX_VY_VZ模式，位置外环控制输出到速度内环
     {
         case px4_application::UavCommand::PX_PY_PZ:
         {
@@ -69,7 +69,7 @@ void UavControl::CommandExecution(void)
         }
         case px4_application::UavCommand::VX_VY_PZ:
         {
-            command_target_uav_.type_mask = 0b000000000011;    // 000 000 000 011
+            command_target_uav_.type_mask = 0b000111000011;    // 000 111 000 011
             command_target_uav_.velocity.x = command_reception_.x;
             command_target_uav_.velocity.y = command_reception_.y;
             command_target_uav_.position.z = command_reception_.z;
@@ -77,7 +77,7 @@ void UavControl::CommandExecution(void)
         }
         case px4_application::UavCommand::VX_PY_VZ:   //控制不了Y位置
         {
-            command_target_uav_.type_mask = 0b000000000101;    // 000 000 000 101
+            command_target_uav_.type_mask = 0b000111000101;    // 000 111 000 101
             command_target_uav_.velocity.x = command_reception_.x;
             command_target_uav_.position.y = command_reception_.y;
             command_target_uav_.velocity.z = command_reception_.z;
@@ -85,9 +85,17 @@ void UavControl::CommandExecution(void)
         }
         case px4_application::UavCommand::PX_VY_VZ:    //控制不了X位置
         {
-            command_target_uav_.type_mask = 0b000000000110;    // 000 000 000 110
+            command_target_uav_.type_mask = 0b000111000110;    // 000 111 000 110
             command_target_uav_.position.x = command_reception_.x;
             command_target_uav_.velocity.y = command_reception_.y;
+            command_target_uav_.velocity.z = command_reception_.z;
+            break;
+        }
+        case px4_application::UavCommand::PX_PY_VZ:    //控制不了X、Y位置
+        {
+            command_target_uav_.type_mask = 0b000111000100;    // 000 111 000 110
+            command_target_uav_.position.x = command_reception_.x;
+            command_target_uav_.position.y = command_reception_.y;
             command_target_uav_.velocity.z = command_reception_.z;
             break;
         }

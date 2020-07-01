@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="px4_application" type="gcs_display" name="gcs_display" output="screen" />
+    <node pkg="px4_application" type="uav_control" name="uav_control" output="screen" />
+</launch>

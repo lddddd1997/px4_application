@@ -1,0 +1,5 @@
+<launch>
+	<node pkg="px4_application" type="uav_collaboration" name="uav_collaboration" output="screen">
+        <rosparam command="load" file="$(find px4_application)/config/uav_collaboration.yaml" />
+	</node>
+</launch>

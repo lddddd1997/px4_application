@@ -81,12 +81,16 @@ ArucoLanding::~ArucoLanding()
 }
 
 /**
-* @name
-* @brief      简易状态机调度
-* @param[in]
-* @param[in]
-* @param[out]
-* @param[out]
+* @name         void States::StateMachineSchedule(const geometry_msgs::Vector3& _position_uav,
+                                                   const ros::Publisher& _uav_command_pub,
+                                                    px4_application::UavCommand* _command_deliver,
+                                                     States** _State)
+* @brief        简易状态机调度
+* @param[in]    无人机ENU位置：_position_uav
+* @param[in]    指令发布器：_uav_command_pub
+* @param[in]    指令信息：_command_deliver
+* @param[in]    无人机状态：_State
+* @param[out]   void
 */
 void States::StateMachineSchedule(const geometry_msgs::Vector3& _position_uav,
                                    const geometry_msgs::Vector3& _position_central_marker,
@@ -108,6 +112,18 @@ States::~States()
     
 }
 
+/**
+* @name         void TakeOff::Run(const geometry_msgs::Vector3& _position_uav,
+                                   const ros::Publisher& _uav_command_pub,
+                                    px4_application::UavCommand* _command_deliver,
+                                     States** _State)
+* @brief        起飞任务接口
+* @param[in]    无人机ENU位置：_position_uav
+* @param[in]    指令发布器：_uav_command_pub
+* @param[in]    指令信息：_command_deliver
+* @param[in]    无人机状态：_State
+* @param[out]   void
+*/
 void TakeOff::Run(const geometry_msgs::Vector3& _position_uav,
                    const geometry_msgs::Vector3& _position_central_marker,
                     const float _yaw_central_marker,
@@ -115,9 +131,9 @@ void TakeOff::Run(const geometry_msgs::Vector3& _position_uav,
                       px4_application::UavCommand* _command_deliver,
                        States** _State)
 {
-    if(!(abs(_position_uav.x - takeoff_position_uav.x) < 0.2 &&
-          abs(_position_uav.y - takeoff_position_uav.y) < 0.2 && 
-           abs(_position_uav.z - takeoff_position_uav.z) < 0.2))    //认为起飞未完成
+    if(!(abs(_position_uav.x - takeoff_position_uav_.x) < 0.2 &&
+          abs(_position_uav.y - takeoff_position_uav_.y) < 0.2 && 
+           abs(_position_uav.z - takeoff_position_uav_.z) < 0.2))    //认为起飞未完成
     {
         _command_deliver->period = 0.05;
         _command_deliver->update = true;
@@ -128,7 +144,7 @@ void TakeOff::Run(const geometry_msgs::Vector3& _position_uav,
         _command_deliver->y = 0;
         _command_deliver->z = 5;
         _command_deliver->yaw = 0;
-        _command_deliver->task_name = "Take Off";
+        _command_deliver->task_name = "TakeOff";
         _uav_command_pub.publish(*_command_deliver);
         return ;
     }
@@ -140,18 +156,30 @@ void TakeOff::Run(const geometry_msgs::Vector3& _position_uav,
 TakeOff::TakeOff()
 {
     ros::NodeHandle nh;
-    nh.param<double>("take_off_x", takeoff_position_uav.x, 0);
-    nh.param<double>("take_off_y", takeoff_position_uav.y, 0);
-    nh.param<double>("take_off_z", takeoff_position_uav.z, 5);
+    nh.param<double>("take_off_x", takeoff_position_uav_.x, 0.0);
+    nh.param<double>("take_off_y", takeoff_position_uav_.y, 0.0);
+    nh.param<double>("take_off_z", takeoff_position_uav_.z, 5.0);
 
-    std::cout << "Take off!" << std::endl;
+    std::cout << "TakeOff!" << std::endl;
 }
 
 TakeOff::~TakeOff()
 {
-    std::cout << "Take off to searching..." << std::endl;
+    std::cout << "TakeOff to Searching..." << std::endl;
 }
 
+/**
+* @name         void Searching::Run(const geometry_msgs::Vector3& _position_uav,
+                                     const ros::Publisher& _uav_command_pub,
+                                      px4_application::UavCommand* _command_deliver,
+                                       States** _State)
+* @brief        搜索任务接口
+* @param[in]    无人机ENU位置：_position_uav
+* @param[in]    指令发布器：_uav_command_pub
+* @param[in]    指令信息：_command_deliver
+* @param[in]    无人机状态：_State
+* @param[out]   void
+*/
 void Searching::Run(const geometry_msgs::Vector3& _position_uav,
                      const geometry_msgs::Vector3& _position_central_marker,
                       const float _yaw_central_marker,
@@ -183,9 +211,21 @@ Searching::Searching()
 
 Searching::~Searching()
 {
-    std::cout << "Searching to tracking..." << std::endl;
+    std::cout << "Searching to Tracking..." << std::endl;
 }
 
+/**
+* @name         void Tracking::Run(const geometry_msgs::Vector3& _position_uav,
+                                    const ros::Publisher& _uav_command_pub,
+                                     px4_application::UavCommand* _command_deliver,
+                                      States** _State)
+* @brief        跟踪任务接口
+* @param[in]    无人机ENU位置：_position_uav
+* @param[in]    指令发布器：_uav_command_pub
+* @param[in]    指令信息：_command_deliver
+* @param[in]    无人机状态：_State
+* @param[out]   void
+*/
 void Tracking::Run(const geometry_msgs::Vector3& _position_uav,
                     const geometry_msgs::Vector3& _position_central_marker,
                      const float _yaw_central_marker,
@@ -204,9 +244,21 @@ Tracking::Tracking()
 
 Tracking::~Tracking()
 {
-    std::cout << "Tracking to landing..." << std::endl;
+    std::cout << "Tracking to Landing..." << std::endl;
 }
 
+/**
+* @name         void Landing::Run(const geometry_msgs::Vector3& _position_uav,
+                                   const ros::Publisher& _uav_command_pub,
+                                    px4_application::UavCommand* _command_deliver,
+                                     States** _State)
+* @brief        降落任务接口
+* @param[in]    无人机ENU位置：_position_uav
+* @param[in]    指令发布器：_uav_command_pub
+* @param[in]    指令信息：_command_deliver
+* @param[in]    无人机状态：_State
+* @param[out]   void
+*/
 void Landing::Run(const geometry_msgs::Vector3& _position_uav,
                    const geometry_msgs::Vector3& _position_central_marker,
                     const float _yaw_central_marker,
@@ -228,6 +280,18 @@ Landing::~Landing()
     std::cout << "Landing to Finished..." << std::endl;
 }
 
+/**
+* @name         void Finished::Run(const geometry_msgs::Vector3& _position_uav,
+                                    const ros::Publisher& _uav_command_pub,
+                                     px4_application::UavCommand* _command_deliver,
+                                      States** _State)
+* @brief        完成任务接口
+* @param[in]    无人机ENU位置：_position_uav
+* @param[in]    指令发布器：_uav_command_pub
+* @param[in]    指令信息：_command_deliver
+* @param[in]    无人机状态：_State
+* @param[out]   void
+*/
 void Finished::Run(const geometry_msgs::Vector3& _position_uav,
                     const geometry_msgs::Vector3& _position_central_marker,
                      const float _yaw_central_marker,

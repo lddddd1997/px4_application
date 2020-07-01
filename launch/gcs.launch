@@ -1,4 +1,0 @@
-<launch>
-    <node pkg="px4_application" type="gcs_display" name="gcs_display" output="screen" launch-prefix="xterm -e"/>
-    <node pkg="px4_application" type="gcs_setting" name="gcs_setting" output="screen" launch-prefix="xterm -e"/>
-</launch>

@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <mavros_msgs/PositionTarget.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <ar_track_alvar_msgs/AlvarMarkers.h>
 #include <tf/transform_datatypes.h>
 #include "px4_application/UavCommand.h"
@@ -40,7 +41,7 @@ private:
                         const ros::Publisher& _uav_command_pub,
                          px4_application::UavCommand* _command_deliver,
                           States** _State);
-    geometry_msgs::Vector3 takeoff_position_uav;
+    geometry_msgs::Vector3 takeoff_position_uav_;
 };
 
 class Searching : public States

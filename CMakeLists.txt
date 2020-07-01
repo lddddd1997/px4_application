@@ -144,6 +144,7 @@ include_directories(
  add_executable(gcs_display src/gcs/gcs_display.cpp)
  add_executable(uav_control src/uav/uav_control.cpp)
  add_executable(aruco_landing src/application/aruco_landing.cpp)
+ add_executable(uav_collaboration src/application/uav_collaboration.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -178,6 +179,11 @@ include_directories(
    ${catkin_LIBRARIES}
  )
 add_dependencies(aruco_landing ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+ target_link_libraries(uav_collaboration
+   ${catkin_LIBRARIES}
+ )
+ add_dependencies(uav_collaboration ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 #############
 ## Install ##
 #############

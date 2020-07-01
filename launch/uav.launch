@@ -1,4 +1,0 @@
-<launch>
-    <node pkg="px4_application" type="uav_control" name="uav_control" output="screen"/>
-    <node pkg="px4_application" type="aruco_landing" name="aruco_landing" output="screen"/>
-</launch>
