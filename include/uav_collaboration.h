@@ -46,14 +46,11 @@ private:
                          const ros::Publisher& _uav_command_pub,
                           px4_application::UavCommand* _command_deliver,
                            States** _State);
-    bool TakeoffUpdate();
-    void ResetTakeoff();
-    void SetTakeoff();
+
     geometry_msgs::Vector3 takeoff_position_uav_;
     geometry_msgs::Vector3 takeoff_absolute_position_param_;    //绝对起飞位置
     double takeoff_relative_height_param_;    //相对起飞高度
     bool takeoff_id_;
-    bool takeoff_update_;
 };
 
 class Assemble : public States
@@ -116,7 +113,6 @@ private:
                          const ros::Publisher& _uav_command_pub,
                           px4_application::UavCommand* _command_deliver,
                            States** _State);
-    int land_detect_count_;
     geometry_msgs::Vector3 landing_pos_vel_uav_;
 };
 

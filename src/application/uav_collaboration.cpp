@@ -155,13 +155,15 @@ void TakeOff::Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
                        px4_application::UavCommand* _command_deliver,
                         States** _State)
 {
-    if(!(_extended_state_uav.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND 
-        && _estimator_status_uav.attitude_status_flag
+    if(!(_estimator_status_uav.attitude_status_flag
          && _estimator_status_uav.velocity_horiz_status_flag
           && _estimator_status_uav.velocity_vert_status_flag))
+    {
+        ROS_ERROR("Waiting for state estimation ");
         return ;
+    }
 
-    if(!TakeoffUpdate())
+    if(_extended_state_uav.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND )
     {
         if(takeoff_id_)
         {
@@ -175,13 +177,6 @@ void TakeOff::Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
             takeoff_position_uav_.y = takeoff_absolute_position_param_.y;
             takeoff_position_uav_.z = takeoff_absolute_position_param_.z;
         }
-        SetTakeoff();
-        std::cout << _position_uav.x << std::endl;
-        std::cout << _position_uav.y << std::endl;
-        std::cout << _position_uav.z << std::endl;
-        std::cout << takeoff_position_uav_.x << std::endl;
-        std::cout << takeoff_position_uav_.y << std::endl;
-        std::cout << takeoff_position_uav_.z << std::endl;
     }
 
     if(!(abs(_position_uav.x - takeoff_position_uav_.x) < 0.2 &&
@@ -206,21 +201,6 @@ void TakeOff::Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
     *_State = new Assemble;    //状态转移
 }
 
-bool TakeOff::TakeoffUpdate()
-{
-    return takeoff_update_;
-}
-
-void TakeOff::ResetTakeoff()
-{
-    takeoff_update_ = false;
-}
-
-void TakeOff::SetTakeoff()
-{
-    takeoff_update_ = true;
-}
-
 TakeOff::TakeOff()
 {
     ros::NodeHandle nh("~");
@@ -229,7 +209,6 @@ TakeOff::TakeOff()
     nh.param<double>("take_off/y", takeoff_absolute_position_param_.y, 0.0);
     nh.param<double>("take_off/z", takeoff_absolute_position_param_.z, 1.0);
     nh.param<double>("take_off/h", takeoff_relative_height_param_, 1.0);
-    ResetTakeoff();
 
     std::cout << "Take off!" << std::endl;
 }
@@ -310,7 +289,7 @@ Assemble::~Assemble()
                                        const ros::Publisher& _uav_command_pub,
                                         px4_application::UavCommand* _command_deliver,
                                          States** _State)
-* @brief        集结任务接口
+* @brief        跟踪任务接口
 * @param[in]    状态估计标记：_estimator_status_uav
 * @param[in]    无人机扩展状态：_extended_state_uav
 * @param[in]    无人机ENU位置：_position_uav
@@ -343,13 +322,13 @@ Tracking::~Tracking()
 }
 
 /**
-* @name         void Landing::Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
-                                   const mavros_msgs::ExtendedState& _extended_state_uav,
-                                    const geometry_msgs::Vector3& _position_uav,
-                                     const geometry_msgs::Vector3& _velocity_uav,
-                                      const ros::Publisher& _uav_command_pub,
-                                       px4_application::UavCommand* _command_deliver,
-                                        States** _State)
+* @name         void ReturnHome::Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
+                                      const mavros_msgs::ExtendedState& _extended_state_uav,
+                                       const geometry_msgs::Vector3& _position_uav,
+                                        const geometry_msgs::Vector3& _velocity_uav,
+                                         const ros::Publisher& _uav_command_pub,
+                                          px4_application::UavCommand* _command_deliver,
+                                           States** _State)
 * @brief        返航任务接口
 * @param[in]    状态估计标记：_estimator_status_uav
 * @param[in]    无人机扩展状态：_extended_state_uav
@@ -431,9 +410,7 @@ void Landing::Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
                        px4_application::UavCommand* _command_deliver,
                         States** _State)
 {
-    if(!(abs(_position_uav.x - landing_pos_vel_uav_.x) < 0.2 &&
-          abs(_position_uav.y - landing_pos_vel_uav_.y) < 0.2 &&
-           abs(_velocity_uav.z) < 0.1))
+    if(!(_extended_state_uav.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND))
     {
 
         _command_deliver->period = 0.05;
@@ -448,12 +425,6 @@ void Landing::Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
         _command_deliver->task_name = "Landing";
         _uav_command_pub.publish(*_command_deliver);
         return ;
-    }
-    else
-    {
-        ++land_detect_count_;
-        if(land_detect_count_ < 100)
-            return ;
     }
     
     delete *_State;
@@ -509,8 +480,8 @@ void Finished::Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
     // _command_deliver->y = 0.0;
     // _command_deliver->z = -1.0;
     // _command_deliver->yaw = 0;
-    // _command_deliver->task_name = "Finished";
-    // _uav_command_pub.publish(*_command_deliver);
+    _command_deliver->task_name = "Finished";
+    _uav_command_pub.publish(*_command_deliver);
     // return ;
 
     // delete *_State;
