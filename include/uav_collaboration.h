@@ -11,26 +11,28 @@
 #include "px4_application/UavCommand.h"
 #include "ros_base.h"
 
+struct UavInfo
+{
+    mavros_msgs::EstimatorStatus estimator_status;
+    mavros_msgs::ExtendedState extended_state;
+    geometry_msgs::Vector3 position;
+    geometry_msgs::Vector3 velocity;
+};
+
 class States
 {
 public:
     States();
     virtual ~States();
-    void StateMachineSchedule(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
-                               const mavros_msgs::ExtendedState& _extended_state_uav,
-                                const geometry_msgs::Vector3& _position_uav,
-                                 const geometry_msgs::Vector3& _velocity_uav,
-                                  const ros::Publisher& _uav_command_pub,
-                                   px4_application::UavCommand* _command_deliver,
-                                    States** _State);    //注：使用指针的指针，确保能访问到对象指针本身，因为状态转移需delete与new操作
+    void StateMachineSchedule(const UavInfo& _UavInfo,
+                               const ros::Publisher& _uav_command_pub,
+                                px4_application::UavCommand* _command_deliver,
+                                 States** _State);    //注：使用指针的指针，确保能访问到对象指针本身，因为状态转移需delete与new操作
 private:
-    virtual void Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
-                      const mavros_msgs::ExtendedState& _extended_state_uav,
-                       const geometry_msgs::Vector3& _position_uav,
-                        const geometry_msgs::Vector3& _velocity_uav,
-                         const ros::Publisher& _uav_command_pub,
-                          px4_application::UavCommand* _command_deliver,
-                           States** _State) = 0;
+    virtual void Run(const UavInfo& _UavInfo,
+                      const ros::Publisher& _uav_command_pub,
+                       px4_application::UavCommand* _command_deliver,
+                        States** _State) = 0;
 };
 
 class TakeOff : public States
@@ -39,18 +41,15 @@ public:
     TakeOff();
     ~TakeOff();
 private:
-    virtual void Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
-                      const mavros_msgs::ExtendedState& _extended_state_uav,
-                       const geometry_msgs::Vector3& _position_uav,
-                        const geometry_msgs::Vector3& _velocity_uav,
-                         const ros::Publisher& _uav_command_pub,
-                          px4_application::UavCommand* _command_deliver,
-                           States** _State);
+    virtual void Run(const UavInfo& _UavInfo,
+                      const ros::Publisher& _uav_command_pub,
+                       px4_application::UavCommand* _command_deliver,
+                        States** _State);
 
     geometry_msgs::Vector3 takeoff_position_uav_;
     geometry_msgs::Vector3 takeoff_absolute_position_param_;    //绝对起飞位置
     double takeoff_relative_height_param_;    //相对起飞高度
-    bool takeoff_id_;
+    bool takeoff_id_;    //false绝对起飞 true相对起飞
 };
 
 class Assemble : public States
@@ -59,13 +58,10 @@ public:
     Assemble();
     ~Assemble();
 private:
-    virtual void Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
-                      const mavros_msgs::ExtendedState& _extended_state_uav,
-                       const geometry_msgs::Vector3& _position_uav,
-                        const geometry_msgs::Vector3& _velocity_uav,
-                         const ros::Publisher& _uav_command_pub,
-                          px4_application::UavCommand* _command_deliver,
-                           States** _State);
+    virtual void Run(const UavInfo& _UavInfo,
+                      const ros::Publisher& _uav_command_pub,
+                       px4_application::UavCommand* _command_deliver,
+                        States** _State);
     geometry_msgs::Vector3 assemble_position_uav_;
 };
 
@@ -75,13 +71,10 @@ public:
     Tracking();
     ~Tracking();
 private:
-    virtual void Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
-                      const mavros_msgs::ExtendedState& _extended_state_uav,
-                       const geometry_msgs::Vector3& _position_uav,
-                        const geometry_msgs::Vector3& _velocity_uav,
-                         const ros::Publisher& _uav_command_pub,
-                          px4_application::UavCommand* _command_deliver,
-                           States** _State);
+    virtual void Run(const UavInfo& _UavInfo,
+                      const ros::Publisher& _uav_command_pub,
+                       px4_application::UavCommand* _command_deliver,
+                        States** _State);
 };
 
 class ReturnHome : public States
@@ -90,13 +83,10 @@ public:
     ReturnHome();
     ~ReturnHome();
 private:
-    virtual void Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
-                      const mavros_msgs::ExtendedState& _extended_state_uav,
-                       const geometry_msgs::Vector3& _position_uav,
-                        const geometry_msgs::Vector3& _velocity_uav,
-                         const ros::Publisher& _uav_command_pub,
-                          px4_application::UavCommand* _command_deliver,
-                           States** _State);
+    virtual void Run(const UavInfo& _UavInfo,
+                      const ros::Publisher& _uav_command_pub,
+                       px4_application::UavCommand* _command_deliver,
+                        States** _State);
     geometry_msgs::Vector3 home_position_uav_;
 };
 
@@ -106,13 +96,10 @@ public:
     Landing();
     ~Landing();
 private:
-    virtual void Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
-                      const mavros_msgs::ExtendedState& _extended_state_uav,
-                       const geometry_msgs::Vector3& _position_uav,
-                        const geometry_msgs::Vector3& _velocity_uav,
-                         const ros::Publisher& _uav_command_pub,
-                          px4_application::UavCommand* _command_deliver,
-                           States** _State);
+    virtual void Run(const UavInfo& _UavInfo,
+                      const ros::Publisher& _uav_command_pub,
+                       px4_application::UavCommand* _command_deliver,
+                        States** _State);
     geometry_msgs::Vector3 landing_pos_vel_uav_;
 };
 
@@ -127,13 +114,10 @@ private:
     // ros::ServiceClient uav_arming_client_;
     // ros::Subscriber uav_state_sub_;
 
-    virtual void Run(const mavros_msgs::EstimatorStatus& _estimator_status_uav,
-                      const mavros_msgs::ExtendedState& _extended_state_uav,
-                       const geometry_msgs::Vector3& _position_uav,
-                        const geometry_msgs::Vector3& _velocity_uav,
-                         const ros::Publisher& _uav_command_pub,
-                          px4_application::UavCommand* _command_deliver,
-                           States** _State);
+    virtual void Run(const UavInfo& _UavInfo,
+                      const ros::Publisher& _uav_command_pub,
+                       px4_application::UavCommand* _command_deliver,
+                        States** _State);
 };
 
 class UavCollaboration : public RosBase 
@@ -153,12 +137,10 @@ private:
     ros::Subscriber uav_extended_state_sub_;
 
     px4_application::UavCommand command_deliver_;
-    geometry_msgs::Vector3 position_uav_;
-    geometry_msgs::Vector3 velocity_uav_;
-    mavros_msgs::EstimatorStatus estimator_status_uav_;    //状态估计标记
-    mavros_msgs::ExtendedState extended_state_uav_;    //扩展状态
 
+    UavInfo UavInfo_;
     States* UavState_;
+
 
     // void LoopTimerCallback(const ros::TimerEvent& _event);
     void UavPositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg);

@@ -4,8 +4,6 @@
 #include <ros/ros.h>
 #include <iostream>
 
-
-
 class RosBase
 {
 public:
