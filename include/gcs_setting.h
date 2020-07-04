@@ -8,7 +8,7 @@
 class GcsSetting : public RosBase
 {
 public:
-    GcsSetting(const ros::NodeHandle& _nh, const double _period);
+    GcsSetting(const ros::NodeHandle& _nh, double _period);
     ~GcsSetting();
     void ModeSelect(void);
 private:

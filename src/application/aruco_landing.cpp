@@ -66,7 +66,7 @@ void ArucoLanding::Initialize(void)
     UavState_ = new TakeOff;    //初始为起飞状态
 }
 
-ArucoLanding::ArucoLanding(const ros::NodeHandle& _nh, const double _period) : RosBase(_nh, _period)
+ArucoLanding::ArucoLanding(const ros::NodeHandle& _nh, double _period) : RosBase(_nh, _period)
 {
     Initialize();
 }
@@ -94,7 +94,7 @@ ArucoLanding::~ArucoLanding()
 */
 void States::StateMachineSchedule(const geometry_msgs::Vector3& _position_uav,
                                    const geometry_msgs::Vector3& _position_central_marker,
-                                    const float _yaw_central_marker,
+                                    float _yaw_central_marker,
                                      const ros::Publisher& _uav_command_pub,
                                       px4_application::UavCommand* _command_deliver,
                                        States** _State)
@@ -126,7 +126,7 @@ States::~States()
 */
 void TakeOff::Run(const geometry_msgs::Vector3& _position_uav,
                    const geometry_msgs::Vector3& _position_central_marker,
-                    const float _yaw_central_marker,
+                    float _yaw_central_marker,
                      const ros::Publisher& _uav_command_pub,
                       px4_application::UavCommand* _command_deliver,
                        States** _State)
@@ -182,7 +182,7 @@ TakeOff::~TakeOff()
 */
 void Searching::Run(const geometry_msgs::Vector3& _position_uav,
                      const geometry_msgs::Vector3& _position_central_marker,
-                      const float _yaw_central_marker,
+                      float _yaw_central_marker,
                        const ros::Publisher& _uav_command_pub,
                         px4_application::UavCommand* _command_deliver,
                          States** _State)
@@ -228,7 +228,7 @@ Searching::~Searching()
 */
 void Tracking::Run(const geometry_msgs::Vector3& _position_uav,
                     const geometry_msgs::Vector3& _position_central_marker,
-                     const float _yaw_central_marker,
+                     float _yaw_central_marker,
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State)
@@ -261,7 +261,7 @@ Tracking::~Tracking()
 */
 void Landing::Run(const geometry_msgs::Vector3& _position_uav,
                    const geometry_msgs::Vector3& _position_central_marker,
-                    const float _yaw_central_marker,
+                    float _yaw_central_marker,
                      const ros::Publisher& _uav_command_pub,
                       px4_application::UavCommand* _command_deliver,
                        States** _State)
@@ -294,7 +294,7 @@ Landing::~Landing()
 */
 void Finished::Run(const geometry_msgs::Vector3& _position_uav,
                     const geometry_msgs::Vector3& _position_central_marker,
-                     const float _yaw_central_marker,
+                     float _yaw_central_marker,
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State)

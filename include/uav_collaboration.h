@@ -123,7 +123,7 @@ private:
 class UavCollaboration : public RosBase 
 {
 public:
-    UavCollaboration(const ros::NodeHandle& _nh, const double _period);
+    UavCollaboration(const ros::NodeHandle& _nh, double _period);
     ~UavCollaboration();
     
 private:

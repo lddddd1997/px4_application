@@ -8,7 +8,7 @@
 class UavControl : public RosBase
 {
 public:
-    UavControl(const ros::NodeHandle& _nh, const double _period);
+    UavControl(const ros::NodeHandle& _nh, double _period);
     ~UavControl();
 
 private:

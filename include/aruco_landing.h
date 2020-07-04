@@ -16,14 +16,14 @@ public:
     virtual ~States();
     void StateMachineSchedule(const geometry_msgs::Vector3& _position_uav,
                                const geometry_msgs::Vector3& _position_central_marker,
-                                const float _yaw_central_marker,
+                                float _yaw_central_marker,
                                  const ros::Publisher& _uav_command_pub,
                                   px4_application::UavCommand* _command_deliver,
                                    States** _State);    //注：使用指针的指针，确保能访问到对象指针本身，因为状态转移需delete与new操作
 private:
     virtual void Run(const geometry_msgs::Vector3& _position_uav,
                       const geometry_msgs::Vector3& _position_central_marker,
-                       const float _yaw_central_marker,
+                       float _yaw_central_marker,
                         const ros::Publisher& _uav_command_pub,
                          px4_application::UavCommand* _command_deliver,
                           States** _State) = 0;
@@ -37,7 +37,7 @@ public:
 private:
     virtual void Run(const geometry_msgs::Vector3& _position_uav,
                       const geometry_msgs::Vector3& _position_central_marker,
-                       const float _yaw_central_marker,
+                       float _yaw_central_marker,
                         const ros::Publisher& _uav_command_pub,
                          px4_application::UavCommand* _command_deliver,
                           States** _State);
@@ -52,7 +52,7 @@ public:
 private:
     virtual void Run(const geometry_msgs::Vector3& _position_uav,
                       const geometry_msgs::Vector3& _position_central_marker,
-                       const float _yaw_central_marker,
+                       float _yaw_central_marker,
                         const ros::Publisher& _uav_command_pub,
                          px4_application::UavCommand* _command_deliver,
                           States** _State);
@@ -66,7 +66,7 @@ public:
 private:
     virtual void Run(const geometry_msgs::Vector3& _position_uav,
                       const geometry_msgs::Vector3& _position_central_marker,
-                       const float _yaw_central_marker,
+                       float _yaw_central_marker,
                         const ros::Publisher& _uav_command_pub,
                          px4_application::UavCommand* _command_deliver,
                           States** _State);
@@ -80,7 +80,7 @@ public:
 private:
     virtual void Run(const geometry_msgs::Vector3& _position_uav,
                       const geometry_msgs::Vector3& _position_central_marker,
-                       const float _yaw_central_marker,
+                       float _yaw_central_marker,
                         const ros::Publisher& _uav_command_pub,
                          px4_application::UavCommand* _command_deliver,
                           States** _State);
@@ -94,7 +94,7 @@ public:
 private:
     virtual void Run(const geometry_msgs::Vector3& _position_uav,
                       const geometry_msgs::Vector3& _position_central_marker,
-                       const float _yaw_central_marker,
+                       float _yaw_central_marker,
                         const ros::Publisher& _uav_command_pub,
                          px4_application::UavCommand* _command_deliver,
                           States** _State);
@@ -103,7 +103,7 @@ private:
 class ArucoLanding : public RosBase 
 {
 public:
-    ArucoLanding(const ros::NodeHandle& _nh, const double _period);
+    ArucoLanding(const ros::NodeHandle& _nh, double _period);
     ~ArucoLanding();
     
 private:

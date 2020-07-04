@@ -73,7 +73,7 @@ void UavCollaboration::Initialize(void)
     UavState_ = new TakeOff;    //初始为起飞状态
 }
 
-UavCollaboration::UavCollaboration(const ros::NodeHandle& _nh, const double _period) : RosBase(_nh, _period)
+UavCollaboration::UavCollaboration(const ros::NodeHandle& _nh, double _period) : RosBase(_nh, _period)
 {
     Initialize();
 }

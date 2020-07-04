@@ -17,7 +17,7 @@
 class GcsDisplay : public RosBase
 {
 public:
-    GcsDisplay(const ros::NodeHandle& _nh, const double _period);
+    GcsDisplay(const ros::NodeHandle& _nh, double _period);
     ~GcsDisplay();
 
 private:

@@ -144,7 +144,7 @@ void GcsSetting::ModeSelect(void)
         
 }
 
-GcsSetting::GcsSetting(const ros::NodeHandle& _nh, const double _period) : RosBase(_nh, _period)
+GcsSetting::GcsSetting(const ros::NodeHandle& _nh, double _period) : RosBase(_nh, _period)
 {
     Initialize();
 }
