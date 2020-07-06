@@ -1,14 +1,14 @@
 #ifndef PX4_APPLICATION_UAV_COLLABORATION_H_
 #define PX4_APPLICATION_UAV_COLLABORATION_H_
 
-#include "ros_base.h"
-#include "px4_application/UavCommand.h"
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/PositionTarget.h>
 #include <mavros_msgs/EstimatorStatus.h>
 #include <mavros_msgs/ExtendedState.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/PoseStamped.h>
+#include "ros_base.h"
+#include "px4_application/UavCommand.h"
 
 struct UavInfo
 {

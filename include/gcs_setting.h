@@ -1,10 +1,10 @@
 #ifndef PX4_APPLICATION_GCS_SETTING_H_
 #define PX4_APPLICATION_GCS_SETTING_H_
 
-#include "ros_base.h"
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
+#include "ros_base.h"
 
 class GcsSetting : public RosBase
 {

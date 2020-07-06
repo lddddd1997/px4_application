@@ -1,11 +1,11 @@
 #ifndef PX4_APPLICATION_UAV_CONTROL_H_
 #define PX4_APPLICATION_UAV_CONTROL_H_
 
+#include <mavros_msgs/PositionTarget.h>
+#include <geometry_msgs/PoseStamped.h>
 #include "ros_base.h"
 #include "px4_application/UavCommand.h"
 #include "pid_controller.h"
-#include <mavros_msgs/PositionTarget.h>
-#include <geometry_msgs/PoseStamped.h>
 
 class UavControl : public RosBase
 {
