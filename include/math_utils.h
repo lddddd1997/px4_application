@@ -4,7 +4,6 @@
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Quaternion.h>
 
-
 class MathUtils
 {
 public:

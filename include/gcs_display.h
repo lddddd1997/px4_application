@@ -1,6 +1,9 @@
 #ifndef PX4_APPLICATION_GCS_DISPLAY_H_
 #define PX4_APPLICATION_GCS_DISPLAY_H_
 
+#include "ros_base.h"
+#include "math_utils.h"
+#include "px4_application/UavCommand.h"
 #include <mavros_msgs/State.h>
 #include <mavros_msgs/EstimatorStatus.h>
 #include <mavros_msgs/ExtendedState.h>
@@ -9,10 +12,8 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/Quaternion.h>
 #include <sensor_msgs/Imu.h>
-#include "ros_base.h"
 #include <tf/transform_datatypes.h>
-#include "math_utils.h"
-#include "px4_application/UavCommand.h"
+
 
 class GcsDisplay : public RosBase
 {

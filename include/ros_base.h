@@ -1,8 +1,8 @@
 #ifndef PX4_APPLICATION_ROS_BASE_H_
 #define PX4_APPLICATION_ROS_BASE_H_
 
-#include <ros/ros.h>
 #include <iostream>
+#include <ros/ros.h>
 
 class RosBase
 {

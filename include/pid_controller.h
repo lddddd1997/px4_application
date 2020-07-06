@@ -1,8 +1,8 @@
 #ifndef PX4_APPLICATION_PID_CONTROLLER_H_
 #define PX4_APPLICATION_PID_CONTROLLER_H_
 
-#include <ros/ros.h>
 #include "math_utils.h"
+#include <ros/ros.h>
 
 struct PidParameters
 {
