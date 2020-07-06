@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="px4_application" type="gcs_display" name="gcs_display" output="screen" />
+</launch>

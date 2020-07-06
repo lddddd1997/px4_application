@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="px4_application" type="uav_control" name="uav_control" output="screen" >
+        <rosparam command="load" file="$(find px4_application)/config/pid_controller.yaml" />
+	</node>
+</launch>
