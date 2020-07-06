@@ -15,31 +15,31 @@
 
 void UavCollaboration::UavPositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg)
 {
-    UavInfo_.position.x = _msg->pose.position.x;
-    UavInfo_.position.y = _msg->pose.position.y;
-    UavInfo_.position.z = _msg->pose.position.z;
+    uav_info_.position.x = _msg->pose.position.x;
+    uav_info_.position.y = _msg->pose.position.y;
+    uav_info_.position.z = _msg->pose.position.z;
 }
 
 void UavCollaboration::UavVelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg)
 {
-    UavInfo_.velocity.x = _msg->twist.linear.x;
-    UavInfo_.velocity.y = _msg->twist.linear.y;
-    UavInfo_.velocity.z = _msg->twist.linear.z;
+    uav_info_.velocity.x = _msg->twist.linear.x;
+    uav_info_.velocity.y = _msg->twist.linear.y;
+    uav_info_.velocity.z = _msg->twist.linear.z;
 }
 
 void UavCollaboration::ExtendedStateCallback(const mavros_msgs::ExtendedState::ConstPtr& _msg)
 {
-    UavInfo_.extended_state = *_msg;
+    uav_info_.extended_state = *_msg;
 }
 
 void UavCollaboration::EstimatorStatusCallback(const mavros_msgs::EstimatorStatus::ConstPtr& _msg)
 {
-    UavInfo_.estimator_status = *_msg;
+    uav_info_.estimator_status = *_msg;
 }
 
 void UavCollaboration::LoopTask(void)
 {
-    UavState_->StateMachineSchedule(UavInfo_,
+    UavState_->StateMachineSchedule(uav_info_,
                                      uav_command_pub_,
                                       &command_deliver_,
                                        &UavState_);    //运行状态机调度
@@ -88,23 +88,23 @@ UavCollaboration::~UavCollaboration()
 }
 
 /**
-* @name         void States::StateMachineSchedule(const UavInfo& _UavInfo,
+* @name         void States::StateMachineSchedule(const UavInfo& _uav_info,
                                                    const ros::Publisher& _uav_command_pub,
                                                     px4_application::UavCommand* _command_deliver,
                                                      States** _State);
 * @brief        简易状态机调度
-* @param[in]    无人机状态：_UavInfo
+* @param[in]    无人机状态：_uav_info
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
 * @param[out]   void
 */
-void States::StateMachineSchedule(const UavInfo& _UavInfo,
+void States::StateMachineSchedule(const UavInfo& _uav_info,
                                    const ros::Publisher& _uav_command_pub,
                                     px4_application::UavCommand* _command_deliver,
                                      States** _State)
 {
-    Run(_UavInfo, _uav_command_pub, _command_deliver, _State);
+    Run(_uav_info, _uav_command_pub, _command_deliver, _State);
 }
 
 States::States()
@@ -118,37 +118,37 @@ States::~States()
 }
 
 /**
-* @name         void TakeOff::Run(const UavInfo& _UavInfo,
+* @name         void TakeOff::Run(const UavInfo& _uav_info,
                                    const ros::Publisher& _uav_command_pub,
                                     px4_application::UavCommand* _command_deliver,
                                      States** _State)
 * @brief        起飞任务接口
-* @param[in]    无人机状态：_UavInfo
+* @param[in]    无人机状态：_uav_info
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
 * @param[out]   void
 */
-void TakeOff::Run(const UavInfo& _UavInfo,
+void TakeOff::Run(const UavInfo& _uav_info,
                    const ros::Publisher& _uav_command_pub,
                     px4_application::UavCommand* _command_deliver,
                      States** _State)
 {
-    if(!(_UavInfo.estimator_status.attitude_status_flag
-         && _UavInfo.estimator_status.velocity_horiz_status_flag
-          && _UavInfo.estimator_status.velocity_vert_status_flag))
+    if(!(_uav_info.estimator_status.attitude_status_flag
+         && _uav_info.estimator_status.velocity_horiz_status_flag
+          && _uav_info.estimator_status.velocity_vert_status_flag))
     {
-        ROS_ERROR("Waiting for state estimation ");
+        ROS_INFO_STREAM_THROTTLE( 1, "Waiting for state estimation to complete..." );
         return ;
     }
 
-    if(_UavInfo.extended_state.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND)
+    if(_uav_info.extended_state.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND)
     {
         if(takeoff_id_)
         {
-            takeoff_position_uav_.x = _UavInfo.position.x;
-            takeoff_position_uav_.y = _UavInfo.position.y;
-            takeoff_position_uav_.z = _UavInfo.position.z + takeoff_relative_height_param_;
+            takeoff_position_uav_.x = _uav_info.position.x;
+            takeoff_position_uav_.y = _uav_info.position.y;
+            takeoff_position_uav_.z = _uav_info.position.z + takeoff_relative_height_param_;
         }
         else
         {
@@ -158,9 +158,9 @@ void TakeOff::Run(const UavInfo& _UavInfo,
         }
     }
 
-    if(!(abs(_UavInfo.position.x - takeoff_position_uav_.x) < 0.2 &&
-          abs(_UavInfo.position.y - takeoff_position_uav_.y) < 0.2 &&
-           abs(_UavInfo.position.z - takeoff_position_uav_.z) < 0.2))    //认为起飞未完成
+    if(!(abs(_uav_info.position.x - takeoff_position_uav_.x) < 0.2 &&
+          abs(_uav_info.position.y - takeoff_position_uav_.y) < 0.2 &&
+           abs(_uav_info.position.z - takeoff_position_uav_.z) < 0.2))    //认为起飞未完成
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -199,25 +199,25 @@ TakeOff::~TakeOff()
 }
 
 /**
-* @name         void Assemble::Run(const UavInfo& _UavInfo,
+* @name         void Assemble::Run(const UavInfo& _uav_info,
                                     const ros::Publisher& _uav_command_pub,
                                      px4_application::UavCommand* _command_deliver,
                                       States** _State)
 * @brief        集结任务接口
-* @param[in]    无人机状态：_UavInfo
+* @param[in]    无人机状态：_uav_info
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
 * @param[out]   void
 */
-void Assemble::Run(const UavInfo& _UavInfo,
+void Assemble::Run(const UavInfo& _uav_info,
                     const ros::Publisher& _uav_command_pub,
                      px4_application::UavCommand* _command_deliver,
                       States** _State)
 {
-    if(!(abs(_UavInfo.position.x - assemble_position_uav_.x) < 0.2 &&
-          abs(_UavInfo.position.y - assemble_position_uav_.y) < 0.2 &&
-           abs(_UavInfo.position.z - assemble_position_uav_.z) < 0.2))
+    if(!(abs(_uav_info.position.x - assemble_position_uav_.x) < 0.2 &&
+          abs(_uav_info.position.y - assemble_position_uav_.y) < 0.2 &&
+           abs(_uav_info.position.z - assemble_position_uav_.z) < 0.2))
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -254,18 +254,18 @@ Assemble::~Assemble()
 }
 
 /**
-* @name         void Tracking::Run(const UavInfo& _UavInfo,
+* @name         void Tracking::Run(const UavInfo& _uav_info,
                                     const ros::Publisher& _uav_command_pub,
                                      px4_application::UavCommand* _command_deliver,
                                       States** _State)
 * @brief        追踪任务接口
-* @param[in]    无人机状态：_UavInfo
+* @param[in]    无人机状态：_uav_info
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
 * @param[out]   void
 */
-void Tracking::Run(const UavInfo& _UavInfo,
+void Tracking::Run(const UavInfo& _uav_info,
                     const ros::Publisher& _uav_command_pub,
                      px4_application::UavCommand* _command_deliver,
                       States** _State)
@@ -285,25 +285,25 @@ Tracking::~Tracking()
 }
 
 /**
-* @name         void ReturnHome::Run(const UavInfo& _UavInfo,
+* @name         void ReturnHome::Run(const UavInfo& _uav_info,
                                       const ros::Publisher& _uav_command_pub,
                                        px4_application::UavCommand* _command_deliver,
                                         States** _State)
 * @brief        返航任务接口
-* @param[in]    无人机状态：_UavInfo
+* @param[in]    无人机状态：_uav_info
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
 * @param[out]   void
 */
-void ReturnHome::Run(const UavInfo& _UavInfo,
+void ReturnHome::Run(const UavInfo& _uav_info,
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State)
 {
-    if(!(abs(_UavInfo.position.x - home_position_uav_.x) < 0.2 &&
-          abs(_UavInfo.position.y - home_position_uav_.y) < 0.2 &&
-           abs(_UavInfo.position.z - home_position_uav_.z) < 0.2))
+    if(!(abs(_uav_info.position.x - home_position_uav_.x) < 0.2 &&
+          abs(_uav_info.position.y - home_position_uav_.y) < 0.2 &&
+           abs(_uav_info.position.z - home_position_uav_.z) < 0.2))
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -340,32 +340,38 @@ ReturnHome::~ReturnHome()
 }
 
 /**
-* @name         void Landing::Run(const UavInfo& _UavInfo,
+* @name         void Landing::Run(const UavInfo& _uav_info,
                                    const ros::Publisher& _uav_command_pub,
                                     px4_application::UavCommand* _command_deliver,
                                      States** _State)
 * @brief        降落任务接口
-* @param[in]    无人机状态：_UavInfo
+* @param[in]    无人机状态：_uav_info
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
 * @param[out]   void
 */
-void Landing::Run(const UavInfo& _UavInfo,
+void Landing::Run(const UavInfo& _uav_info,
                    const ros::Publisher& _uav_command_pub,
                     px4_application::UavCommand* _command_deliver,
                      States** _State)
 {
-    if(!(_UavInfo.extended_state.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND))    //未检测到着陆
+    if(!(_uav_info.extended_state.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND))    //未检测到着陆
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
         _command_deliver->update = true;
-        _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
+        // _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
+        // _command_deliver->yaw_id = px4_application::UavCommand::NO_YAW;
+        // _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
+        // _command_deliver->x = 1.5*(landing_pos_vel_uav_.x - _uav_info.position.x);
+        // _command_deliver->y = 1.5*(landing_pos_vel_uav_.y - _uav_info.position.y);
+        // _command_deliver->z = landing_pos_vel_uav_.z;
+        _command_deliver->xyz_id = px4_application::UavCommand::PX_PY_VZ;
         _command_deliver->yaw_id = px4_application::UavCommand::NO_YAW;
         _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
-        _command_deliver->x = 1.5*(landing_pos_vel_uav_.x - _UavInfo.position.x);
-        _command_deliver->y = 1.5*(landing_pos_vel_uav_.y - _UavInfo.position.y);
+        _command_deliver->x = landing_pos_vel_uav_.x;
+        _command_deliver->y = landing_pos_vel_uav_.y;
         _command_deliver->z = landing_pos_vel_uav_.z;
         _command_deliver->yaw = 0;
         _command_deliver->task_name = "Landing";
@@ -383,6 +389,7 @@ Landing::Landing()
     nh.param<double>("landing/x", landing_pos_vel_uav_.x, 0.0);
     nh.param<double>("landing/y", landing_pos_vel_uav_.y, 0.0);
     nh.param<double>("landing/vz", landing_pos_vel_uav_.z, -0.5);
+
     std::cout << "Landing!" << std::endl;
 }
 
@@ -392,18 +399,18 @@ Landing::~Landing()
 }
 
 /**
-* @name         void Finished::Run(const UavInfo& _UavInfo,
+* @name         void Finished::Run(const UavInfo& _uav_info,
                                     const ros::Publisher& _uav_command_pub,
                                      px4_application::UavCommand* _command_deliver,
                                       States** _State)
 * @brief        完成任务接口
-* @param[in]    无人机状态：_UavInfo
+* @param[in]    无人机状态：_uav_info
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
 * @param[out]   void
 */
-void Finished::Run(const UavInfo& _UavInfo,
+void Finished::Run(const UavInfo& _uav_info,
                     const ros::Publisher& _uav_command_pub,
                      px4_application::UavCommand* _command_deliver,
                       States** _State)

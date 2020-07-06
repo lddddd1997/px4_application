@@ -24,12 +24,12 @@ class States
 public:
     States();
     virtual ~States();
-    void StateMachineSchedule(const UavInfo& _UavInfo,
+    void StateMachineSchedule(const UavInfo& _uav_info,
                                const ros::Publisher& _uav_command_pub,
                                 px4_application::UavCommand* _command_deliver,
                                  States** _State);    //注：使用指针的指针，确保能访问到对象指针本身，因为状态转移需delete与new操作
 private:
-    virtual void Run(const UavInfo& _UavInfo,
+    virtual void Run(const UavInfo& _uav_info,
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State) = 0;
@@ -41,7 +41,7 @@ public:
     TakeOff();
     ~TakeOff();
 private:
-    virtual void Run(const UavInfo& _UavInfo,
+    virtual void Run(const UavInfo& _uav_info,
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State);
@@ -58,7 +58,7 @@ public:
     Assemble();
     ~Assemble();
 private:
-    virtual void Run(const UavInfo& _UavInfo,
+    virtual void Run(const UavInfo& _uav_info,
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State);
@@ -71,7 +71,7 @@ public:
     Tracking();
     ~Tracking();
 private:
-    virtual void Run(const UavInfo& _UavInfo,
+    virtual void Run(const UavInfo& _uav_info,
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State);
@@ -83,7 +83,7 @@ public:
     ReturnHome();
     ~ReturnHome();
 private:
-    virtual void Run(const UavInfo& _UavInfo,
+    virtual void Run(const UavInfo& _uav_info,
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State);
@@ -96,11 +96,12 @@ public:
     Landing();
     ~Landing();
 private:
-    virtual void Run(const UavInfo& _UavInfo,
+    virtual void Run(const UavInfo& _uav_info,
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State);
     geometry_msgs::Vector3 landing_pos_vel_uav_;
+    
 };
 
 class Finished : public States
@@ -114,7 +115,7 @@ private:
     // ros::ServiceClient uav_arming_client_;
     // ros::Subscriber uav_state_sub_;
 
-    virtual void Run(const UavInfo& _UavInfo,
+    virtual void Run(const UavInfo& _uav_info,
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State);
@@ -138,7 +139,7 @@ private:
 
     px4_application::UavCommand command_deliver_;
 
-    UavInfo UavInfo_;
+    UavInfo uav_info_;
     States* UavState_;
 
 
