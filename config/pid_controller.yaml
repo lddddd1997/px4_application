@@ -1,0 +1,18 @@
+pid_xy:
+  pos:
+    kp: 1.5
+    ki: 0.0
+    kd: 0.0
+    ff: 0.0
+    error_max: 8.0
+    integral_max: 6.0
+    output_max: 10.0  #QGC XY速度最大期望默认10m/s
+pid_z:
+  pos:
+    kp: 1.0
+    ki: 0.0
+    kd: 0.0
+    ff: 0.0
+    error_max: 3.0
+    integral_max: 2.0
+    output_max: 2.0  #QGC Z速度最大上升默认3m/s 下降1m/s
