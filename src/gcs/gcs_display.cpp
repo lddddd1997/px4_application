@@ -135,7 +135,7 @@ void GcsDisplay::UavStateDisplay(void)
     //固定的浮点显示
     std::cout.setf(std::ios::fixed);
     //setprecision(n) 设显示小数精度为n位
-    std::cout<<std::setprecision(2);
+    std::cout << std::setprecision(2);
     //左对齐
     std::cout.setf(std::ios::right);
     // 强制显示小数点
@@ -216,12 +216,12 @@ void GcsDisplay::UavStateDisplay(void)
         frame_name = " [ERROR]";
     }
     int setw_num = 9;
-    std::cout << "----------------------------Navigation Info [ENU]----------------------------" << std::endl;
-    std::cout << "FCU Position    [X Y Z] : " << std::setw(setw_num) << local_position_uav_.x << " [ m ] " << std::setw(setw_num) << local_position_uav_.y << " [ m ] " << std::setw(setw_num) << local_position_uav_.z << " [ m ] " << std::endl;
-    std::cout << "FCU Velocity    [X Y Z] : " << std::setw(setw_num) << local_velocity_uav_.x << " [m/s] " << std::setw(setw_num) << local_velocity_uav_.y << " [m/s] " << std::setw(setw_num) << local_velocity_uav_.z << " [m/s] " << std::endl;
     std::cout << "--------------------------------Attitude Info--------------------------------" << std::endl;
     std::cout << "Attitude Angle  [R P Y] : " << std::setw(setw_num) << attitude_angle_uav_.x * RAD2DEG << " [ ° ] " << std::setw(setw_num) << attitude_angle_uav_.y * RAD2DEG << " [ ° ] " << std::setw(setw_num) << attitude_angle_uav_.z * RAD2DEG << " [ ° ] " << std::endl;
     std::cout << "Attitude Rate   [R P Y] : " << std::setw(setw_num) << attitude_rate_uav_.x  * RAD2DEG << " [°/s] " << std::setw(setw_num) << attitude_rate_uav_.y  * RAD2DEG << " [°/s] " << std::setw(setw_num) << attitude_rate_uav_.z  * RAD2DEG << " [°/s] " << std::endl;
+    std::cout << "----------------------------Navigation Info [ENU]----------------------------" << std::endl;
+    std::cout << "FCU Position    [X Y Z] : " << std::setw(setw_num) << local_position_uav_.x << " [ m ] " << std::setw(setw_num) << local_position_uav_.y << " [ m ] " << std::setw(setw_num) << local_position_uav_.z << " [ m ] " << std::endl;
+    std::cout << "FCU Velocity    [X Y Z] : " << std::setw(setw_num) << local_velocity_uav_.x << " [m/s] " << std::setw(setw_num) << local_velocity_uav_.y << " [m/s] " << std::setw(setw_num) << local_velocity_uav_.z << " [m/s] " << std::endl;
     std::cout << "-------------------------------Command" << frame_name << "-------------------------------" << std::endl;
     std::cout << "Period: " << command_reception_.period  << " [s] " << " [ " << command_reception_.task_name << " ] ";
     // if (command_reception_.update == true)
