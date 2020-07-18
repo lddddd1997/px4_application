@@ -70,11 +70,11 @@ void UavControl::Initialize(void)
     nh_.param<float>("pid_z/pos/integral_max", param.integral_max, 2.0);
     nh_.param<float>("pid_z/pos/output_max", param.output_max, 2.0);    //QGC Z速度最大上升默认3m/s 下降1m/s
     PoseZ.SetParameters(param);
-    std::cout << "X Position controller parameters " << std::endl;
+    std::cout << "----------X Position controller parameters----------" << std::endl;
     PoseX.PrintParameters();
-    std::cout << "Y Position controller parameters " << std::endl;
+    std::cout << "----------Y Position controller parameters----------" << std::endl;
     PoseY.PrintParameters();
-    std::cout << "Z Position controller parameters " << std::endl;
+    std::cout << "----------Z Position controller parameters----------" << std::endl;
     PoseZ.PrintParameters();
 }
 
@@ -87,110 +87,7 @@ void UavControl::CommandExecution(void)
 {
     // if(!command_reception_.update)    //如果指令没更新，则退出
     //     return;
-    switch(command_reception_.xyz_id)    //注：建议在位置速度组合控制时，使用VX_VY_VZ模式，位置外环控制输出到速度内环
-    {
-        case px4_application::UavCommand::PX_PY_PZ:
-        {
-            // command_target_uav_.type_mask = 0b000111111000;    // 000 111 111 000
-            // command_target_uav_.position.x = command_reception_.x;
-            // command_target_uav_.position.y = command_reception_.y;
-            // command_target_uav_.position.z = command_reception_.z;
-            command_target_uav_.type_mask = 0b000111000111;
-            command_target_uav_.velocity.x = PoseX.ControlOutput(command_reception_.x, local_position_uav_.x);
-            command_target_uav_.velocity.y = PoseY.ControlOutput(command_reception_.y, local_position_uav_.y);
-            command_target_uav_.velocity.z = PoseZ.ControlOutput(command_reception_.z, local_position_uav_.z);
-            break;
-        }
-        case px4_application::UavCommand::VX_VY_VZ:
-        {
-            command_target_uav_.type_mask = 0b000111000111;    // 000 111 000 111
-            command_target_uav_.velocity.x = command_reception_.x;
-            command_target_uav_.velocity.y = command_reception_.y;
-            command_target_uav_.velocity.z = command_reception_.z;
-            break;
-        }
-        case px4_application::UavCommand::VX_VY_PZ:
-        {
-            // command_target_uav_.type_mask = 0b000111000011;    // 000 111 000 011
-            // command_target_uav_.velocity.x = command_reception_.x;
-            // command_target_uav_.velocity.y = command_reception_.y;
-            // command_target_uav_.position.z = command_reception_.z;
-            command_target_uav_.type_mask = 0b000111000111;
-            command_target_uav_.velocity.x = command_reception_.x;
-            command_target_uav_.velocity.y = command_reception_.y;
-            command_target_uav_.velocity.z = PoseZ.ControlOutput(command_reception_.z, local_position_uav_.z);
-            break;
-        }
-        case px4_application::UavCommand::VX_PY_VZ:   //控制不了Y位置
-        {
-            // command_target_uav_.type_mask = 0b000111000101;    // 000 111 000 101
-            // command_target_uav_.velocity.x = command_reception_.x;
-            // command_target_uav_.position.y = command_reception_.y;
-            // command_target_uav_.velocity.z = command_reception_.z;
-            command_target_uav_.type_mask = 0b000111000111;
-            command_target_uav_.velocity.x = command_reception_.x;
-            command_target_uav_.velocity.y = PoseY.ControlOutput(command_reception_.y, local_position_uav_.y);
-            command_target_uav_.velocity.z = command_reception_.z;
-            break;
-        }
-        case px4_application::UavCommand::PX_VY_VZ:    //控制不了X位置
-        {
-            // command_target_uav_.type_mask = 0b000111000110;    // 000 111 000 110
-            // command_target_uav_.position.x = command_reception_.x;
-            // command_target_uav_.velocity.y = command_reception_.y;
-            // command_target_uav_.velocity.z = command_reception_.z;
-            command_target_uav_.type_mask = 0b000111000111;
-            command_target_uav_.velocity.x = PoseX.ControlOutput(command_reception_.x, local_position_uav_.x);
-            command_target_uav_.velocity.y = command_reception_.y;
-            command_target_uav_.velocity.z = command_reception_.z;
-            break;
-        }
-        case px4_application::UavCommand::PX_PY_VZ:    //控制不了X、Y位置
-        {
-            // command_target_uav_.type_mask = 0b000111000100;    // 000 111 000 110
-            // command_target_uav_.position.x = command_reception_.x;
-            // command_target_uav_.position.y = command_reception_.y;
-            // command_target_uav_.velocity.z = command_reception_.z;
-            command_target_uav_.type_mask = 0b000111000111;
-            command_target_uav_.velocity.x = PoseX.ControlOutput(command_reception_.x, local_position_uav_.x);
-            command_target_uav_.velocity.y = PoseY.ControlOutput(command_reception_.y, local_position_uav_.y);
-            command_target_uav_.velocity.z = command_reception_.z;
-            break;
-        }
-        default: 
-        {
-            command_target_uav_.type_mask = 0b111111111111;
-            break;
-        }
-    }
-
-    switch(command_reception_.yaw_id)
-    {
-        case px4_application::UavCommand::NO_YAW:    //无航向指令
-        {
-            command_target_uav_.type_mask |= 0b110000000000;
-
-            break;
-        }
-        case px4_application::UavCommand::YAW:    //航向角指令
-        {
-            command_target_uav_.type_mask |= 0b100000000000;
-            command_target_uav_.yaw = command_reception_.yaw;
-            break;
-        }
-        case px4_application::UavCommand::YAW_RATE:    //航向角速度指令
-        {
-            command_target_uav_.type_mask |= 0b010000000000;
-            command_target_uav_.yaw_rate = command_reception_.yaw;
-            break;
-        }
-        default:
-        {
-            command_target_uav_.type_mask |= 0b110000000000;
-            break;
-        }
-    }
-
+    //坐标系选择
     switch(command_reception_.frame_id)
     {
         case px4_application::UavCommand::LOCAL:
@@ -209,6 +106,96 @@ void UavControl::CommandExecution(void)
             break;
         }
     }
+    //航向控制选择
+    switch(command_reception_.yaw_id)
+    {
+        case px4_application::UavCommand::NO_YAW:    //无航向指令
+        {
+            command_target_uav_.type_mask = 0b110000000000;
+
+            break;
+        }
+        case px4_application::UavCommand::YAW:    //航向角指令
+        {
+            command_target_uav_.type_mask = 0b100000000000;
+            command_target_uav_.yaw = command_reception_.yaw;
+            break;
+        }
+        case px4_application::UavCommand::YAW_RATE:    //航向角速度指令
+        {
+            command_target_uav_.type_mask = 0b010000000000;
+            command_target_uav_.yaw_rate = command_reception_.yaw;
+            break;
+        }
+        default:
+        {
+            command_target_uav_.type_mask = 0b110000000000;
+            break;
+        }
+    }
+    //位置速度控制选择
+    switch(command_reception_.xyz_id)    //注：建议在位置速度组合控制时，使用VX_VY_VZ模式，位置外环控制输出到速度内环
+    {
+        case px4_application::UavCommand::PX_PY_PZ:
+        {
+            command_target_uav_.type_mask |= 0b000111000111;
+            command_target_uav_.velocity.x = PoseX.ControlOutput(command_reception_.x, local_position_uav_.x);
+            command_target_uav_.velocity.y = PoseY.ControlOutput(command_reception_.y, local_position_uav_.y);
+            command_target_uav_.velocity.z = PoseZ.ControlOutput(command_reception_.z, local_position_uav_.z);
+            break;
+        }
+        case px4_application::UavCommand::VX_VY_VZ:
+        {
+            command_target_uav_.type_mask |= 0b000111000111;    // 000 111 000 111
+            command_target_uav_.velocity.x = command_reception_.x;
+            command_target_uav_.velocity.y = command_reception_.y;
+            command_target_uav_.velocity.z = command_reception_.z;
+            break;
+        }
+        case px4_application::UavCommand::VX_VY_PZ:
+        {
+            command_target_uav_.type_mask |= 0b000111000111;
+            command_target_uav_.velocity.x = command_reception_.x;
+            command_target_uav_.velocity.y = command_reception_.y;
+            command_target_uav_.velocity.z = PoseZ.ControlOutput(command_reception_.z, local_position_uav_.z);
+            break;
+        }
+        case px4_application::UavCommand::VX_PY_VZ:
+        {
+            command_target_uav_.type_mask |= 0b000111000111;
+            command_target_uav_.velocity.x = command_reception_.x;
+            command_target_uav_.velocity.y = PoseY.ControlOutput(command_reception_.y, local_position_uav_.y);
+            command_target_uav_.velocity.z = command_reception_.z;
+            break;
+        }
+        case px4_application::UavCommand::PX_VY_VZ:
+        {
+            command_target_uav_.type_mask |= 0b000111000111;
+            command_target_uav_.velocity.x = PoseX.ControlOutput(command_reception_.x, local_position_uav_.x);
+            command_target_uav_.velocity.y = command_reception_.y;
+            command_target_uav_.velocity.z = command_reception_.z;
+            break;
+        }
+        case px4_application::UavCommand::PX_PY_VZ:
+        {
+            command_target_uav_.type_mask |= 0b000111000111;
+            command_target_uav_.velocity.x = PoseX.ControlOutput(command_reception_.x, local_position_uav_.x);
+            command_target_uav_.velocity.y = PoseY.ControlOutput(command_reception_.y, local_position_uav_.y);
+            command_target_uav_.velocity.z = command_reception_.z;
+            break;
+        }
+        case px4_application::UavCommand::UX_UY_UZ:
+        {
+            command_target_uav_.type_mask &= 0x4000;    //保持
+            break;
+        }
+        default: 
+        {
+            command_target_uav_.type_mask &= 0x4000;
+            break;
+        }
+    }
+
     command_target_uav_.header.stamp = ros::Time::now();
     setpoint_raw_local_pub_.publish(command_target_uav_);
     CommandUpdateReset();    //update重置
