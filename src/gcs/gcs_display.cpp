@@ -265,6 +265,11 @@ void GcsDisplay::UavStateDisplay(void)
             std::cout << " [ PX_PY_VZ ] ";
             break;
         }
+        case px4_application::UavCommand::UX_UY_UZ:
+        {
+            std::cout << " [ UX_UY_UZ ] ";
+            break;
+        }
         default:     
         {
             std::cout << " [ ERROR ] ";
