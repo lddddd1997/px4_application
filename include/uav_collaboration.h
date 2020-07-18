@@ -34,6 +34,18 @@ private:
                         States** _State) = 0;
 };
 
+class Prepare : public States
+{
+public:
+    Prepare();
+    ~Prepare();
+private:
+    virtual void Run(const UavInfo& _uav_info,
+                      const ros::Publisher& _uav_command_pub,
+                       px4_application::UavCommand* _command_deliver,
+                        States** _State);
+};
+
 class TakeOff : public States
 {
 public:
