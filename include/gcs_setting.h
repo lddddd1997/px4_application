@@ -15,7 +15,7 @@ public:
 private:
     // ros::NodeHandle nh_;
     // ros::Timer loop_timer_;
-    //double loop_period_;
+    // double loop_period_;
     ros::Subscriber uav_state_sub_;
     ros::ServiceClient uav_set_mode_client_;
     ros::ServiceClient uav_arming_client_;
