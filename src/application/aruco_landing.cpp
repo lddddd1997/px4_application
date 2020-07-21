@@ -155,7 +155,7 @@ void TakeOff::Run(const geometry_msgs::Vector3& _position_uav,
 
 TakeOff::TakeOff()
 {
-    ros::NodeHandle nh;
+    ros::NodeHandle nh("~");
     nh.param<double>("take_off_x", takeoff_position_uav_.x, 0.0);
     nh.param<double>("take_off_y", takeoff_position_uav_.y, 0.0);
     nh.param<double>("take_off_z", takeoff_position_uav_.z, 5.0);

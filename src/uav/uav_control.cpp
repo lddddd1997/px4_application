@@ -51,24 +51,24 @@ void UavControl::Initialize(void)
                                                                           &UavControl::UavPositionCallback,
                                                                            this,
                                                                             ros::TransportHints().tcpNoDelay());
-
+    ros::NodeHandle nh("~");
     PidParameters param;
-    nh_.param<float>("pid_xy/pos/kp", param.kp, 1.0);
-    nh_.param<float>("pid_xy/pos/ki", param.ki, 0.0);
-    nh_.param<float>("pid_xy/pos/kd", param.kd, 0.0);
-    nh_.param<float>("pid_xy/pos/ff", param.ff, 0.0);
-    nh_.param<float>("pid_xy/pos/error_max", param.error_max, 10.0);
-    nh_.param<float>("pid_xy/pos/integral_max", param.integral_max, 5.0);
-    nh_.param<float>("pid_xy/pos/output_max", param.output_max, 8.0);    //QGC XY速度最大期望默认10m/s
+    nh.param<float>("pid_xy/pos/kp", param.kp, 1.0);
+    nh.param<float>("pid_xy/pos/ki", param.ki, 0.0);
+    nh.param<float>("pid_xy/pos/kd", param.kd, 0.0);
+    nh.param<float>("pid_xy/pos/ff", param.ff, 0.0);
+    nh.param<float>("pid_xy/pos/error_max", param.error_max, 10.0);
+    nh.param<float>("pid_xy/pos/integral_max", param.integral_max, 5.0);
+    nh.param<float>("pid_xy/pos/output_max", param.output_max, 8.0);    //QGC XY速度最大期望默认10m/s
     PoseX.SetParameters(param);
     PoseY.SetParameters(param);
-    nh_.param<float>("pid_z/pos/kp", param.kp, 1.0);
-    nh_.param<float>("pid_z/pos/ki", param.ki, 0.0);
-    nh_.param<float>("pid_z/pos/kd", param.kd, 0.0);
-    nh_.param<float>("pid_z/pos/ff", param.ff, 0.0);
-    nh_.param<float>("pid_z/pos/error_max", param.error_max, 3.0);
-    nh_.param<float>("pid_z/pos/integral_max", param.integral_max, 2.0);
-    nh_.param<float>("pid_z/pos/output_max", param.output_max, 2.0);    //QGC Z速度最大上升默认3m/s 下降1m/s
+    nh.param<float>("pid_z/pos/kp", param.kp, 1.0);
+    nh.param<float>("pid_z/pos/ki", param.ki, 0.0);
+    nh.param<float>("pid_z/pos/kd", param.kd, 0.0);
+    nh.param<float>("pid_z/pos/ff", param.ff, 0.0);
+    nh.param<float>("pid_z/pos/error_max", param.error_max, 3.0);
+    nh.param<float>("pid_z/pos/integral_max", param.integral_max, 2.0);
+    nh.param<float>("pid_z/pos/output_max", param.output_max, 2.0);    //QGC Z速度最大上升默认3m/s 下降1m/s
     PoseZ.SetParameters(param);
     std::cout << "----------X Position controller parameters----------" << std::endl;
     PoseX.PrintParameters();
