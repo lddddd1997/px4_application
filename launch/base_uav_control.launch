@@ -1,5 +1,7 @@
 <launch>
-    <node pkg="px4_application" type="uav_control" name="uav_control" output="screen" >
+    <arg name="uav_id" default="0"/>
+    <arg name="namespace" value="$(eval 'uav' + str(arg('uav_id')))"/>
+    <node pkg="px4_application" type="uav_control" name="uav_control" output="screen" ns="$(arg namespace)">
         <rosparam command="load" file="$(find px4_application)/config/pid_controller.yaml" />
 	</node>
 </launch>
