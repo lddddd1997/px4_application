@@ -5,10 +5,12 @@
 * @note
 * @author   lddddd
 *           Email: lddddd1997@gmail.com
-* @date     2020.6.28
-* @version  1.0
+*           Github: https://github.com/lddddd1997
+* @date     2020.7.21
+* @version  2.0
 * @par      Edit history:
 *           1.0: lddddd, 2020.6.28, .
+*           2.0: lddddd, 2020.7.21, 更新节点句柄与topic的命名空间.
 */
 
 #include "uav_collaboration.h"
@@ -48,24 +50,24 @@ void UavCollaboration::LoopTask(void)
 void UavCollaboration::Initialize(void)
 {
     // loop_timer_ = nh_.createTimer(ros::Duration(loop_period_), &ArucoLanding::LoopTimerCallback, this); 
-    uav_command_pub_ = nh_.advertise<px4_application::UavCommand>("/px4_application/uav_command", 10);
+    uav_command_pub_ = nh_.advertise<px4_application::UavCommand>("px4_application/uav_command", 10);
 
-    uav_local_position_sub_ = nh_.subscribe<geometry_msgs::PoseStamped>("/mavros/local_position/pose",
+    uav_local_position_sub_ = nh_.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose",
                                                                          10,
                                                                           &UavCollaboration::UavPositionCallback,
                                                                            this,
                                                                             ros::TransportHints().tcpNoDelay());
-    uav_local_velocity_sub_ = nh_.subscribe<geometry_msgs::TwistStamped>("/mavros/local_position/velocity_local",
+    uav_local_velocity_sub_ = nh_.subscribe<geometry_msgs::TwistStamped>("mavros/local_position/velocity_local",
                                                                           10,
                                                                            &UavCollaboration::UavVelocityCallback,
                                                                             this,
                                                                              ros::TransportHints().tcpNoDelay());
-    uav_estimator_sub_ = nh_.subscribe<mavros_msgs::EstimatorStatus>("/mavros/estimator_status",
+    uav_estimator_sub_ = nh_.subscribe<mavros_msgs::EstimatorStatus>("mavros/estimator_status",
                                                                       10,
                                                                        &UavCollaboration::EstimatorStatusCallback,
                                                                         this,
                                                                          ros::TransportHints().tcpNoDelay());
-    uav_extended_state_sub_ = nh_.subscribe<mavros_msgs::ExtendedState>("/mavros/extended_state",
+    uav_extended_state_sub_ = nh_.subscribe<mavros_msgs::ExtendedState>("mavros/extended_state",
                                                                          10,
                                                                           &UavCollaboration::ExtendedStateCallback,
                                                                            this,
@@ -97,7 +99,7 @@ UavCollaboration::~UavCollaboration()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void States::StateMachineSchedule(const UavInfo& _uav_info,
                                    const ros::Publisher& _uav_command_pub,
@@ -127,7 +129,7 @@ States::~States()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
-* @param[out]   void  
+* @param[out]   NULL  
 */
 void Prepare::Run(const UavInfo& _uav_info,
                    const ros::Publisher& _uav_command_pub,
@@ -173,7 +175,7 @@ Prepare::~Prepare()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void TakeOff::Run(const UavInfo& _uav_info,
                    const ros::Publisher& _uav_command_pub,
@@ -254,7 +256,7 @@ TakeOff::~TakeOff()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void Assemble::Run(const UavInfo& _uav_info,
                     const ros::Publisher& _uav_command_pub,
@@ -309,7 +311,7 @@ Assemble::~Assemble()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void Tracking::Run(const UavInfo& _uav_info,
                     const ros::Publisher& _uav_command_pub,
@@ -340,7 +342,7 @@ Tracking::~Tracking()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void ReturnHome::Run(const UavInfo& _uav_info,
                       const ros::Publisher& _uav_command_pub,
@@ -395,7 +397,7 @@ ReturnHome::~ReturnHome()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void Landing::Run(const UavInfo& _uav_info,
                    const ros::Publisher& _uav_command_pub,
@@ -454,7 +456,7 @@ Landing::~Landing()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    状态机：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void Finished::Run(const UavInfo& _uav_info,
                     const ros::Publisher& _uav_command_pub,
@@ -489,7 +491,7 @@ Finished::~Finished()
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "uav_collaboration");
-    ros::NodeHandle nh("~");
+    ros::NodeHandle nh;
     UavCollaboration UavCollaboration(nh, 0.05);
     
     ros::spin();

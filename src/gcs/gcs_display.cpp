@@ -5,11 +5,14 @@
 * @note
 * @author   lddddd
 *           Email: lddddd1997@gmail.com
-* @date     2020.5.24
-* @version  1.0
+*           Github: https://github.com/lddddd1997
+* @date     2020.7.21
+* @version  2.0
 * @par      Edit history:
 *           1.0: lddddd, 2020.5.24, .
+*           2.0: lddddd, 2020.7.21, 更新节点句柄与topic的命名空间.
 */
+
 #include "gcs_display.h"
 
 // void GcsDisplay::LoopTimerCallback(const ros::TimerEvent& _event)
@@ -93,37 +96,37 @@ void GcsDisplay::Initialize(void)
     current_state_uav_.mode = "UNKNOWN";
     command_reception_.task_name = "UNKNOWN";
     //loop_timer_ = nh_.createTimer(ros::Duration(loop_period_), &GcsDisplay::LoopTimerCallback, this);
-    uav_state_sub_ = nh_.subscribe<mavros_msgs::State>("/mavros/state",
+    uav_state_sub_ = nh_.subscribe<mavros_msgs::State>("mavros/state",
                                                         10,
                                                          &GcsDisplay::UavStateCallback,
                                                           this,
                                                            ros::TransportHints().tcpNoDelay());   //tcpNoDelay默认true降低延迟
-    uav_local_position_sub_ = nh_.subscribe<geometry_msgs::PoseStamped>("/mavros/local_position/pose",
+    uav_local_position_sub_ = nh_.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose",
                                                                          10,
                                                                           &GcsDisplay::UavPositionCallback,
                                                                            this,
                                                                             ros::TransportHints().tcpNoDelay());
-    uav_local_velocity_sub_ = nh_.subscribe<geometry_msgs::TwistStamped>("/mavros/local_position/velocity_local",
+    uav_local_velocity_sub_ = nh_.subscribe<geometry_msgs::TwistStamped>("mavros/local_position/velocity_local",
                                                                           10,
                                                                            &GcsDisplay::UavVelocityCallback,
                                                                             this,
                                                                              ros::TransportHints().tcpNoDelay());
-    uav_imu_sub_ = nh_.subscribe<sensor_msgs::Imu>("/mavros/imu/data",
+    uav_imu_sub_ = nh_.subscribe<sensor_msgs::Imu>("mavros/imu/data",
                                                     10,
                                                      &GcsDisplay::UavImuCallback,
                                                       this,
                                                        ros::TransportHints().tcpNoDelay());
-    uav_estimator_sub_ = nh_.subscribe<mavros_msgs::EstimatorStatus>("/mavros/estimator_status",
+    uav_estimator_sub_ = nh_.subscribe<mavros_msgs::EstimatorStatus>("mavros/estimator_status",
                                                                       10,
                                                                        &GcsDisplay::EstimatorStatusCallback,
                                                                         this,
                                                                          ros::TransportHints().tcpNoDelay());
-    uav_extended_state_sub_ = nh_.subscribe<mavros_msgs::ExtendedState>("/mavros/extended_state",
+    uav_extended_state_sub_ = nh_.subscribe<mavros_msgs::ExtendedState>("mavros/extended_state",
                                                                          10,
                                                                           &GcsDisplay::ExtendedStateCallback,
                                                                            this,
                                                                             ros::TransportHints().tcpNoDelay());
-    uav_command_sub_ = nh_.subscribe<px4_application::UavCommand>("/px4_application/uav_command",
+    uav_command_sub_ = nh_.subscribe<px4_application::UavCommand>("px4_application/uav_command",
                                                                    10,
                                                                     &GcsDisplay::UavCommandCallback,
                                                                      this,
@@ -319,7 +322,7 @@ GcsDisplay::~GcsDisplay()
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "gcs_display");
-    ros::NodeHandle nh("~");
+    ros::NodeHandle nh;
     GcsDisplay GcsDisplay(nh, 0.1);
 
     ros::spin();

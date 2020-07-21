@@ -5,11 +5,13 @@
 * @note
 * @author   lddddd
 *           Email: lddddd1997@gmail.com
-* @date     2020.7.06
-* @version  1.1
+*           Github: https://github.com/lddddd1997
+* @date     2020.7.21
+* @version  2.0
 * @par      Edit history:
 *           1.0: lddddd, 2020.5.24, .
 *           1.1: lddddd, 2020.7.06, 内部指令输入全部修改为速度输入.
+*           2.0: lddddd, 2020.7.21, 更新节点句柄与topic的命名空间.
 */
 
 #include "uav_control.h"
@@ -40,35 +42,35 @@ void UavControl::LoopTask(void)
 void UavControl::Initialize(void)
 {
     // loop_timer_ = nh_.createTimer(ros::Duration(loop_period_), &UavControl::LoopTimerCallback, this); //周期为0.01s
-    setpoint_raw_local_pub_ = nh_.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
-    uav_command_sub_ = nh_.subscribe<px4_application::UavCommand>("/px4_application/uav_command",
+    setpoint_raw_local_pub_ = nh_.advertise<mavros_msgs::PositionTarget>("mavros/setpoint_raw/local", 10);
+    uav_command_sub_ = nh_.subscribe<px4_application::UavCommand>("px4_application/uav_command",
                                                                    1,
                                                                     &UavControl::UavCommandCallback,
                                                                      this,
                                                                       ros::TransportHints().tcpNoDelay());
-    uav_local_position_sub_ = nh_.subscribe<geometry_msgs::PoseStamped>("/mavros/local_position/pose",
+    uav_local_position_sub_ = nh_.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose",
                                                                          10,
                                                                           &UavControl::UavPositionCallback,
                                                                            this,
                                                                             ros::TransportHints().tcpNoDelay());
-
+    ros::NodeHandle nh("~");
     PidParameters param;
-    nh_.param<float>("pid_xy/pos/kp", param.kp, 1.0);
-    nh_.param<float>("pid_xy/pos/ki", param.ki, 0.0);
-    nh_.param<float>("pid_xy/pos/kd", param.kd, 0.0);
-    nh_.param<float>("pid_xy/pos/ff", param.ff, 0.0);
-    nh_.param<float>("pid_xy/pos/error_max", param.error_max, 10.0);
-    nh_.param<float>("pid_xy/pos/integral_max", param.integral_max, 5.0);
-    nh_.param<float>("pid_xy/pos/output_max", param.output_max, 8.0);    //QGC XY速度最大期望默认10m/s
+    nh.param<float>("pid_xy/pos/kp", param.kp, 1.0);
+    nh.param<float>("pid_xy/pos/ki", param.ki, 0.0);
+    nh.param<float>("pid_xy/pos/kd", param.kd, 0.0);
+    nh.param<float>("pid_xy/pos/ff", param.ff, 0.0);
+    nh.param<float>("pid_xy/pos/error_max", param.error_max, 10.0);
+    nh.param<float>("pid_xy/pos/integral_max", param.integral_max, 5.0);
+    nh.param<float>("pid_xy/pos/output_max", param.output_max, 8.0);    //QGC XY速度最大期望默认10m/s
     PoseX.SetParameters(param);
     PoseY.SetParameters(param);
-    nh_.param<float>("pid_z/pos/kp", param.kp, 1.0);
-    nh_.param<float>("pid_z/pos/ki", param.ki, 0.0);
-    nh_.param<float>("pid_z/pos/kd", param.kd, 0.0);
-    nh_.param<float>("pid_z/pos/ff", param.ff, 0.0);
-    nh_.param<float>("pid_z/pos/error_max", param.error_max, 3.0);
-    nh_.param<float>("pid_z/pos/integral_max", param.integral_max, 2.0);
-    nh_.param<float>("pid_z/pos/output_max", param.output_max, 2.0);    //QGC Z速度最大上升默认3m/s 下降1m/s
+    nh.param<float>("pid_z/pos/kp", param.kp, 1.0);
+    nh.param<float>("pid_z/pos/ki", param.ki, 0.0);
+    nh.param<float>("pid_z/pos/kd", param.kd, 0.0);
+    nh.param<float>("pid_z/pos/ff", param.ff, 0.0);
+    nh.param<float>("pid_z/pos/error_max", param.error_max, 3.0);
+    nh.param<float>("pid_z/pos/integral_max", param.integral_max, 2.0);
+    nh.param<float>("pid_z/pos/output_max", param.output_max, 2.0);    //QGC Z速度最大上升默认3m/s 下降1m/s
     PoseZ.SetParameters(param);
     std::cout << "----------X Position controller parameters----------" << std::endl;
     PoseX.PrintParameters();
@@ -217,7 +219,7 @@ UavControl::~UavControl()
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "uav_control");
-    ros::NodeHandle nh("~");
+    ros::NodeHandle nh;
     UavControl UavControl(nh, 0.01);
     
     ros::spin();

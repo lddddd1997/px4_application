@@ -5,10 +5,12 @@
 * @note
 * @author   lddddd
 *           Email: lddddd1997@gmail.com
-* @date     2020.6.8
-* @version  1.0
+*           Github: https://github.com/lddddd1997
+* @date     2020.7.21
+* @version  2.0
 * @par      Edit history:
 *           1.0: lddddd, 2020.6.8, .
+*           2.0: lddddd, 2020.7.21, 更新节点句柄与topic的命名空间.
 */
 
 #include "aruco_landing.h"
@@ -52,13 +54,13 @@ void ArucoLanding::LoopTask(void)
 void ArucoLanding::Initialize(void)
 {
     // loop_timer_ = nh_.createTimer(ros::Duration(loop_period_), &ArucoLanding::LoopTimerCallback, this); 
-    uav_command_pub_ = nh_.advertise<px4_application::UavCommand>("/px4_application/uav_command", 10);
-    marker_detect_sub_ = nh_.subscribe<ar_track_alvar_msgs::AlvarMarkers>("/ar_pose_marker",
+    uav_command_pub_ = nh_.advertise<px4_application::UavCommand>("px4_application/uav_command", 10);
+    marker_detect_sub_ = nh_.subscribe<ar_track_alvar_msgs::AlvarMarkers>("ar_pose_marker",
                                                                            10,
                                                                             &ArucoLanding::ArucoDetectResultCallback,
                                                                              this,
                                                                               ros::TransportHints().tcpNoDelay());
-    uav_local_position_sub_ = nh_.subscribe<geometry_msgs::PoseStamped>("/mavros/local_position/pose",
+    uav_local_position_sub_ = nh_.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose",
                                                                          10,
                                                                           &ArucoLanding::UavPositionCallback,
                                                                            this,
@@ -90,7 +92,7 @@ ArucoLanding::~ArucoLanding()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    无人机状态：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void States::StateMachineSchedule(const geometry_msgs::Vector3& _position_uav,
                                    const geometry_msgs::Vector3& _position_central_marker,
@@ -122,7 +124,7 @@ States::~States()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    无人机状态：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void TakeOff::Run(const geometry_msgs::Vector3& _position_uav,
                    const geometry_msgs::Vector3& _position_central_marker,
@@ -155,7 +157,7 @@ void TakeOff::Run(const geometry_msgs::Vector3& _position_uav,
 
 TakeOff::TakeOff()
 {
-    ros::NodeHandle nh;
+    ros::NodeHandle nh("~");
     nh.param<double>("take_off_x", takeoff_position_uav_.x, 0.0);
     nh.param<double>("take_off_y", takeoff_position_uav_.y, 0.0);
     nh.param<double>("take_off_z", takeoff_position_uav_.z, 5.0);
@@ -178,7 +180,7 @@ TakeOff::~TakeOff()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    无人机状态：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void Searching::Run(const geometry_msgs::Vector3& _position_uav,
                      const geometry_msgs::Vector3& _position_central_marker,
@@ -224,7 +226,7 @@ Searching::~Searching()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    无人机状态：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void Tracking::Run(const geometry_msgs::Vector3& _position_uav,
                     const geometry_msgs::Vector3& _position_central_marker,
@@ -257,7 +259,7 @@ Tracking::~Tracking()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    无人机状态：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void Landing::Run(const geometry_msgs::Vector3& _position_uav,
                    const geometry_msgs::Vector3& _position_central_marker,
@@ -290,7 +292,7 @@ Landing::~Landing()
 * @param[in]    指令发布器：_uav_command_pub
 * @param[in]    指令信息：_command_deliver
 * @param[in]    无人机状态：_State
-* @param[out]   void
+* @param[out]   NULL
 */
 void Finished::Run(const geometry_msgs::Vector3& _position_uav,
                     const geometry_msgs::Vector3& _position_central_marker,
@@ -316,7 +318,7 @@ Finished::~Finished()
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "aruco_landing");
-    ros::NodeHandle nh("~");
+    ros::NodeHandle nh;
     ArucoLanding ArucoLanding(nh, 0.05);
     
     ros::spin();

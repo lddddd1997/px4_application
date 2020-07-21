@@ -5,11 +5,14 @@
 * @note
 * @author   lddddd
 *           Email: lddddd1997@gmail.com
-* @date     2020.5.24
-* @version  1.0
+*           Github: https://github.com/lddddd1997
+* @date     2020.7.21
+* @version  2.0
 * @par      Edit history:
 *           1.0: lddddd, 2020.5.24, .
+*           2.0: lddddd, 2020.7.21, 更新节点句柄与topic的命名空间.
 */
+
 #include "gcs_setting.h"
 
 // void GcsSetting::LoopTimerCallback(const ros::TimerEvent& _event)
@@ -33,12 +36,12 @@ void GcsSetting::Initialize(void)
     armed_cmd_ = false;
     
     // loop_timer_ = nh_.createTimer(ros::Duration(loop_period_), &GcsSetting::LoopTimerCallback, this);
-    uav_state_sub_ = nh_.subscribe<mavros_msgs::State>("/mavros/state",
+    uav_state_sub_ = nh_.subscribe<mavros_msgs::State>("mavros/state",
                                                         10, &GcsSetting::UavStateCallback,
                                                          this,
                                                           ros::TransportHints().tcpNoDelay());
-    uav_set_mode_client_ = nh_.serviceClient<mavros_msgs::SetMode>("/mavros/set_mode");
-    uav_arming_client_ = nh_.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
+    uav_set_mode_client_ = nh_.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
+    uav_arming_client_ = nh_.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
 }
 
 void GcsSetting::ModeSelect(void)
@@ -157,7 +160,7 @@ GcsSetting::~GcsSetting()
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "gcs_setting");
-    ros::NodeHandle nh("~");
+    ros::NodeHandle nh;
     GcsSetting GcsSetting(nh, 0.1);
     ros::Rate rate(10.0);
 
@@ -167,7 +170,6 @@ int main(int argc, char **argv)
         GcsSetting.ModeSelect();
         rate.sleep();
     }
-
 
     return 0;
 }
