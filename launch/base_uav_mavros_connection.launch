@@ -1,0 +1,14 @@
+<launch>
+    <!-- MAVROS and vehicle configs -->
+    <!-- Simulation "udp://:14540@127.0.0.1:14557" -->
+    <!-- Usb        "/dev/ttyACM0:57600" -->
+    <!-- Nano       "/dev/ttyTHS1:921600" -->
+    <arg name="uav_id" default="0"/>
+    <arg name="fcu_url" default="udp://:14540@127.0.0.1:14557"/>
+    <arg name="group_name" value="$(eval 'uav' + str(arg('uav_id')))"/>
+    <group ns="$(arg group_name)">
+        <include file="$(find mavros)/launch/px4.launch">
+            <arg name="fcu_url" value="$(arg fcu_url)"/>
+        </include>
+    </group>
+</launch>
