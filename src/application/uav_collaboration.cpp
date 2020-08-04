@@ -11,6 +11,7 @@
 * @par      Edit history:
 *           1.0: lddddd, 2020.6.28, .
 *           2.0: lddddd, 2020.7.21, 更新节点句柄与topic的命名空间.
+* TODO:     Add collaboration and visual algorithms.
 */
 
 #include "uav_collaboration.h"
@@ -111,7 +112,10 @@ void States::StateMachineSchedule(const UavInfo& _uav_info,
 
 States::States()
 {
-    
+    ros::NodeHandle nh("~");
+    nh.param<double>("range/x", reach_point_range_.x, 0.1);
+    nh.param<double>("range/y", reach_point_range_.y, 0.1);
+    nh.param<double>("range/z", reach_point_range_.z, 0.1);
 }
 
 States::~States()
@@ -206,9 +210,9 @@ void TakeOff::Run(const UavInfo& _uav_info,
         }
     }
 
-    if(!(abs(_uav_info.position.x - takeoff_position_uav_.x) < 0.2 &&
-          abs(_uav_info.position.y - takeoff_position_uav_.y) < 0.2 &&
-           abs(_uav_info.position.z - takeoff_position_uav_.z) < 0.2))    //认为起飞未完成
+    if(!(abs(_uav_info.position.x - takeoff_position_uav_.x) < reach_point_range_.x &&
+          abs(_uav_info.position.y - takeoff_position_uav_.y) < reach_point_range_.y &&
+           abs(_uav_info.position.z - takeoff_position_uav_.z) < reach_point_range_.z))    //认为起飞未完成
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -263,9 +267,9 @@ void Assemble::Run(const UavInfo& _uav_info,
                      px4_application::UavCommand* _command_deliver,
                       States** _State)
 {
-    if(!(abs(_uav_info.position.x - assemble_position_uav_.x) < 0.2 &&
-          abs(_uav_info.position.y - assemble_position_uav_.y) < 0.2 &&
-           abs(_uav_info.position.z - assemble_position_uav_.z) < 0.2))
+    if(!(abs(_uav_info.position.x - assemble_position_uav_.x) < reach_point_range_.x &&
+          abs(_uav_info.position.y - assemble_position_uav_.y) < reach_point_range_.y &&
+           abs(_uav_info.position.z - assemble_position_uav_.z) < reach_point_range_.z))
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -349,9 +353,9 @@ void ReturnHome::Run(const UavInfo& _uav_info,
                        px4_application::UavCommand* _command_deliver,
                         States** _State)
 {
-    if(!(abs(_uav_info.position.x - home_position_uav_.x) < 0.2 &&
-          abs(_uav_info.position.y - home_position_uav_.y) < 0.2 &&
-           abs(_uav_info.position.z - home_position_uav_.z) < 0.2))
+    if(!(abs(_uav_info.position.x - home_position_uav_.x) < reach_point_range_.x &&
+          abs(_uav_info.position.y - home_position_uav_.y) < reach_point_range_.y &&
+           abs(_uav_info.position.z - home_position_uav_.z) < reach_point_range_.z))
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -377,7 +381,7 @@ ReturnHome::ReturnHome()
     ros::NodeHandle nh("~");
     nh.param<double>("home/x", home_position_uav_.x, 0.0);
     nh.param<double>("home/y", home_position_uav_.y, 0.0);
-    nh.param<double>("home/z", home_position_uav_.z, 10.0);
+    nh.param<double>("home/z", home_position_uav_.z, 5.0);
 
     std::cout << "ReturnHome!" << std::endl;
 }

@@ -32,6 +32,8 @@ private:
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State) = 0;
+protected:
+    geometry_msgs::Vector3 reach_point_range_;
 };
 
 class Prepare : public States
