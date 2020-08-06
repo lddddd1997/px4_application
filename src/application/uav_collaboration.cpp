@@ -46,7 +46,7 @@ UavCollaboration::~UavCollaboration()
 }
 
 /**
-* @name         void States::StateMachineSchedule(const UavInfo& _uav_info,
+* @name         void States::StateMachineSchedule(const px4_application::UavStatus& _uav_info,
                                                    const ros::Publisher& _uav_command_pub,
                                                     px4_application::UavCommand* _command_deliver,
                                                      States** _State);
@@ -79,7 +79,7 @@ States::~States()
 }
 
 /**
-* @name         void Prepare::Run(const UavInfo& _uav_info,
+* @name         void Prepare::Run(const px4_application::UavStatus& _uav_info,
                                    const ros::Publisher& _uav_command_pub,
                                     px4_application::UavCommand* _command_deliver,
                                      States** _State)
@@ -100,7 +100,6 @@ void Prepare::Run(const px4_application::UavStatus& _uav_info,
          && _uav_info.estimator_status.velocity_horiz_status_flag
           && _uav_info.estimator_status.velocity_vert_status_flag))
     {
-        ROS_INFO_STREAM_THROTTLE( 1, "Waiting for state estimation to complete..." );
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
         _command_deliver->update = true;
@@ -116,16 +115,17 @@ void Prepare::Run(const px4_application::UavStatus& _uav_info,
 
 Prepare::Prepare()
 {
-    std::cout << "Prepare!" << std::endl;
+    std::cout << "[ Prepare ]" << std::endl;
+    ROS_ERROR("Waiting for state estimation to complete..." );
 }
 
 Prepare::~Prepare()
 {
-    std::cout << "Prepare to Take off..." << std::endl;
+    std::cout << "Prepare state transition..." << std::endl;
 }
 
 /**
-* @name         void TakeOff::Run(const UavInfo& _uav_info,
+* @name         void TakeOff::Run(const px4_application::UavStatus& _uav_info,
                                    const ros::Publisher& _uav_command_pub,
                                     px4_application::UavCommand* _command_deliver,
                                      States** _State)
@@ -198,16 +198,16 @@ TakeOff::TakeOff()
     nh.param<double>("take_off/z", takeoff_absolute_position_param_.z, 1.0);
     nh.param<double>("take_off/h", takeoff_relative_height_param_, 1.0);
 
-    std::cout << "Take off!" << std::endl;
+    std::cout << "[ Take off ]" << std::endl;
 }
 
 TakeOff::~TakeOff()
 {
-    std::cout << "TakeOff to Assemble..." << std::endl;
+    std::cout << "Takeoff state transition..." << std::endl;
 }
 
 /**
-* @name         void Assemble::Run(const UavInfo& _uav_info,
+* @name         void Assemble::Run(const px4_application::UavStatus& _uav_info,
                                     const ros::Publisher& _uav_command_pub,
                                      px4_application::UavCommand* _command_deliver,
                                       States** _State)
@@ -253,16 +253,16 @@ Assemble::Assemble()
     nh.param<double>("assemble/y", assemble_position_uav_.y, 15.0);
     nh.param<double>("assemble/z", assemble_position_uav_.z, 10.0);
 
-    std::cout << "Assemble!" << std::endl;
+    std::cout << "[ Assemble ]" << std::endl;
 }
 
 Assemble::~Assemble()
 {
-    std::cout << "Assemble to Tracking..." << std::endl;
+    std::cout << "Assemble state transition..." << std::endl;
 }
 
 /**
-* @name         void Tracking::Run(const UavInfo& _uav_info,
+* @name         void Tracking::Run(const px4_application::UavStatus& _uav_info,
                                     const ros::Publisher& _uav_command_pub,
                                      px4_application::UavCommand* _command_deliver,
                                       States** _State)
@@ -284,16 +284,16 @@ void Tracking::Run(const px4_application::UavStatus& _uav_info,
 
 Tracking::Tracking()
 {
-    std::cout << "Tracking!" << std::endl;
+    std::cout << "[ Tracking ]" << std::endl;
 }
 
 Tracking::~Tracking()
 {
-    std::cout << "Tracking to ReturnHome..." << std::endl;
+    std::cout << "Tracking state transition..." << std::endl;
 }
 
 /**
-* @name         void ReturnHome::Run(const UavInfo& _uav_info,
+* @name         void ReturnHome::Run(const px4_application::UavStatus& _uav_info,
                                       const ros::Publisher& _uav_command_pub,
                                        px4_application::UavCommand* _command_deliver,
                                         States** _State)
@@ -339,16 +339,16 @@ ReturnHome::ReturnHome()
     nh.param<double>("home/y", home_position_uav_.y, 0.0);
     nh.param<double>("home/z", home_position_uav_.z, 5.0);
 
-    std::cout << "ReturnHome!" << std::endl;
+    std::cout << "[ ReturnHome ]" << std::endl;
 }
 
 ReturnHome::~ReturnHome()
 {
-    std::cout << "ReturnHome to Landing..." << std::endl;
+    std::cout << "ReturnHome state transition..." << std::endl;
 }
 
 /**
-* @name         void Landing::Run(const UavInfo& _uav_info,
+* @name         void Landing::Run(const px4_application::UavStatus& _uav_info,
                                    const ros::Publisher& _uav_command_pub,
                                     px4_application::UavCommand* _command_deliver,
                                      States** _State)
@@ -392,16 +392,16 @@ Landing::Landing()
     nh.param<double>("landing/y", landing_pos_vel_uav_.y, 0.0);
     nh.param<double>("landing/vz", landing_pos_vel_uav_.z, -0.5);
 
-    std::cout << "Landing!" << std::endl;
+    std::cout << "[ Landing ]" << std::endl;
 }
 
 Landing::~Landing()
 {
-    std::cout << "Landing to Finished..." << std::endl;
+    std::cout << "Landing state transition..." << std::endl;
 }
 
 /**
-* @name         void Finished::Run(const UavInfo& _uav_info,
+* @name         void Finished::Run(const px4_application::UavStatus& _uav_info,
                                     const ros::Publisher& _uav_command_pub,
                                      px4_application::UavCommand* _command_deliver,
                                       States** _State)
@@ -434,12 +434,12 @@ void Finished::Run(const px4_application::UavStatus& _uav_info,
 Finished::Finished()
 {
 
-    std::cout << "Finished!" << std::endl;
+    std::cout << "[ Finished ]" << std::endl;
 }
 
 Finished::~Finished()
 {
-    
+    std::cout << "Finished state transition..." << std::endl;
 }
 
 int main(int argc, char **argv)
