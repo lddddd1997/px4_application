@@ -1,6 +1,0 @@
-std_msgs/Header header
-
-geometry_msgs/Vector3 position
-geometry_msgs/Vector3 velocity
-mavros_msgs/EstimatorStatus estimator_status
-mavros_msgs/ExtendedState extended_state

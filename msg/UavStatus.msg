@@ -1,0 +1,9 @@
+std_msgs/Header header
+
+mavros_msgs/State state
+mavros_msgs/EstimatorStatus estimator_status
+mavros_msgs/ExtendedState extended_state
+geometry_msgs/Vector3 attitude_angle
+geometry_msgs/Vector3 attitude_rate
+geometry_msgs/Vector3 position
+geometry_msgs/Vector3 velocity
