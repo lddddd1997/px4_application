@@ -6,8 +6,8 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <tf/transform_datatypes.h>
-#include"px4_application/UavStatus.h"
-#include"px4_application/TargetStatus.h"
+#include "px4_application/UavStatus.h"
+#include "px4_application/TargetStatus.h"
 
 class StatusSubscriber
 {

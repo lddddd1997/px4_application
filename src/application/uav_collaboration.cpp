@@ -359,8 +359,6 @@ Tracking::Tracking() : TrackingX(PidController::NORMAL)
     nh.param<double>("threshold/y", tracking_threshold_.y, 0.3);
     nh.param<double>("threshold/z", tracking_threshold_.z, 0.3);
 
-    std::cout << tracking_position_.x << tracking_yaw_ << tracking_threshold_.x << std::endl;
-
     PidParameters param;
     nh.param<float>("pid_xy/tracking/kp", param.kp, 1.0);
     nh.param<float>("pid_xy/tracking/ki", param.ki, 0.0);
