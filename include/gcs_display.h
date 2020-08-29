@@ -2,7 +2,7 @@
 #define PX4_APPLICATION_GCS_DISPLAY_H_
 
 #include "ros_base.h"
-#include "uav_status_subscriber.h"
+#include "status_subscriber.h"
 #include "px4_application/UavCommand.h"
 
 class GcsDisplay : public RosBase
@@ -15,7 +15,7 @@ private:
     ros::Time begin_time_;
     ros::Subscriber uav_command_sub_;
 
-    StatusSubscriber current_info_;    //无人机状态
+    StatusSubscriber current_info_;    //无人机与目标状态
     px4_application::UavCommand command_reception_;
 
     float GetTimePassSec(void);
