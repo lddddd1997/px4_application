@@ -20,52 +20,6 @@
 //     UavStateDisplay();
 // }
 
-// void GcsDisplay::UavStateCallback(const mavros_msgs::State::ConstPtr& _msg)
-// {
-//     current_state_uav_ = *_msg;
-// }
-
-// void GcsDisplay::UavPositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg)
-// {
-//     local_position_uav_.x = _msg->pose.position.x;
-//     local_position_uav_.y = _msg->pose.position.y;
-//     local_position_uav_.z = _msg->pose.position.z;
-// }
-
-// void GcsDisplay::UavVelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg)
-// {
-//     local_velocity_uav_.x = _msg->twist.linear.x;
-//     local_velocity_uav_.y = _msg->twist.linear.y;
-//     local_velocity_uav_.z = _msg->twist.linear.z;
-// }
-
-// void GcsDisplay::UavImuCallback(const sensor_msgs::Imu::ConstPtr& _msg)
-// {
-//     attitude_rate_uav_.x = _msg->angular_velocity.x;
-//     attitude_rate_uav_.y = _msg->angular_velocity.y;
-//     attitude_rate_uav_.z = _msg->angular_velocity.z;
-//     quaternion_uav_.w = _msg->orientation.w;
-//     quaternion_uav_.x = _msg->orientation.x;
-//     quaternion_uav_.y = _msg->orientation.y;
-//     quaternion_uav_.z = _msg->orientation.z;
-
-//     // MathUtils::Quaternion2Euler(quaternion_uav_, attitude_angle_uav_);
-
-//     tf::Quaternion quat;
-//     tf::quaternionMsgToTF(quaternion_uav_, quat);
-//     tf::Matrix3x3(quat).getRPY(attitude_angle_uav_.x, attitude_angle_uav_.y, attitude_angle_uav_.z);    //四元数转欧拉角
-// }
-
-// void GcsDisplay::EstimatorStatusCallback(const mavros_msgs::EstimatorStatus::ConstPtr& _msg)
-// {
-//     estimator_status_uav_ = *_msg;
-// }
-
-// void GcsDisplay::ExtendedStateCallback(const mavros_msgs::ExtendedState::ConstPtr& _msg)
-// {
-//     extended_state_uav_ = *_msg;
-// }
-
 void GcsDisplay::UavCommandCallback(const px4_application::UavCommand::ConstPtr& _msg)
 {
     command_reception_ = *_msg;
@@ -93,7 +47,7 @@ void GcsDisplay::LoopTask(void)
 void GcsDisplay::Initialize(void)
 {
     begin_time_ = ros::Time::now();
-    current_info_.status.state.mode = "UNKNOWN";
+    current_info_.uav_status.state.mode = "UNKNOWN";
     command_reception_.task_name = "UNKNOWN";
     uav_command_sub_ = nh_.subscribe<px4_application::UavCommand>("px4_application/uav_command",
                                                                    10,
@@ -104,26 +58,26 @@ void GcsDisplay::Initialize(void)
 void GcsDisplay::UavStateDisplay(void)
 {
     std::cout << "---------------------------------State Info----------------------------------" << std::endl;
-    //固定的浮点显示
+    /*固定的浮点显示*/
     std::cout.setf(std::ios::fixed);
-    //setprecision(n) 设显示小数精度为n位
+    /*setprecision(n) 设显示小数精度为n位*/
     std::cout << std::setprecision(2);
-    //左对齐
+    /*左对齐*/
     std::cout.setf(std::ios::right);
-    // 强制显示小数点
+    /*强制显示小数点*/
     std::cout.setf(std::ios::showpoint);
-    // 强制显示符号
+    /*强制显示符号*/
     std::cout.setf(std::ios::showpos);
 
     std::cout << "Time:" << std::setw(8) << GetTimePassSec() << " [s] ";
 
-    //是否和飞控建立起连接
-    std::cout << (current_info_.status.state.connected ? " [ Connected ] " : " [ Unconnected ] ");
-    //是否上锁
-    std::cout << (current_info_.status.state.armed ? " [ Armed ] " : " [ DisArmed ] ");
-    std::cout << " [ " << current_info_.status.state.mode <<" ] ";
+    /*是否和飞控建立起连接*/
+    std::cout << (current_info_.uav_status.state.connected ? " [ Connected ] " : " [ Unconnected ] ");
+    /*是否上锁*/
+    std::cout << (current_info_.uav_status.state.armed ? " [ Armed ] " : " [ DisArmed ] ");
+    std::cout << " [ " << current_info_.uav_status.state.mode <<" ] ";
     std::string flight_state;
-    switch(current_info_.status.extended_state.landed_state)
+    switch(current_info_.uav_status.extended_state.landed_state)
     {
         case mavros_msgs::ExtendedState::LANDED_STATE_UNDEFINED: flight_state = "UNDEFINED"; break;
         case mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND: flight_state = "ON_GROUND"; break;
@@ -136,25 +90,25 @@ void GcsDisplay::UavStateDisplay(void)
     std::cout << " [ " << flight_state << " ] " << std::endl;
 
     std::cout << "Estimated Status:  ";
-    std::cout << "Attitude   " << (current_info_.status.estimator_status.attitude_status_flag ? "[√]   " : "[X]   ")
-               << "Vel Horiz Rel " << (current_info_.status.estimator_status.velocity_horiz_status_flag ? "[√]   " : "[X]   ") 
-                << "Vel Verti Rel " << (current_info_.status.estimator_status.velocity_vert_status_flag ? "[√]   " : "[X]   ") << std::endl;
+    std::cout << "Attitude   " << (current_info_.uav_status.estimator_status.attitude_status_flag ? "[√]   " : "[X]   ")
+               << "Vel Horiz Rel " << (current_info_.uav_status.estimator_status.velocity_horiz_status_flag ? "[√]   " : "[X]   ") 
+                << "Vel Verti Rel " << (current_info_.uav_status.estimator_status.velocity_vert_status_flag ? "[√]   " : "[X]   ") << std::endl;
 
 
     std::cout << "                   ";
-    std::cout << "Accel      " << (current_info_.status.estimator_status.accel_error_status_flag ? "[X]   " : "[√]   ")
-               << "Pos Verti Rel " << (current_info_.status.estimator_status.pos_vert_agl_status_flag ? "[√]   " : "[X]   ") 
-                << "Pos Verti Abs " << (current_info_.status.estimator_status.pos_vert_abs_status_flag ? "[√]   " : "[X]   ") << std::endl;
+    std::cout << "Accel      " << (current_info_.uav_status.estimator_status.accel_error_status_flag ? "[X]   " : "[√]   ")
+               << "Pos Verti Rel " << (current_info_.uav_status.estimator_status.pos_vert_agl_status_flag ? "[√]   " : "[X]   ") 
+                << "Pos Verti Abs " << (current_info_.uav_status.estimator_status.pos_vert_abs_status_flag ? "[√]   " : "[X]   ") << std::endl;
 
     std::cout << "                   ";
-    std::cout << "Gps Glitch " << (current_info_.status.estimator_status.gps_glitch_status_flag ? "[√]   " : "[X]   ")
-               << "Pos Horiz Rel " << (current_info_.status.estimator_status.pos_horiz_rel_status_flag ? "[√]   " : "[X]   ") 
-                << "Pos Horiz Abs " << (current_info_.status.estimator_status.pos_horiz_abs_status_flag ? "[√]   " : "[X]   ") << std::endl;
+    std::cout << "Gps Glitch " << (current_info_.uav_status.estimator_status.gps_glitch_status_flag ? "[√]   " : "[X]   ")
+               << "Pos Horiz Rel " << (current_info_.uav_status.estimator_status.pos_horiz_rel_status_flag ? "[√]   " : "[X]   ") 
+                << "Pos Horiz Abs " << (current_info_.uav_status.estimator_status.pos_horiz_abs_status_flag ? "[√]   " : "[X]   ") << std::endl;
 
     std::cout << "                   ";
-    std::cout << "Const Mode " << (current_info_.status.estimator_status.const_pos_mode_status_flag ? "[√]   " : "[X]   ")
-               << "pre Horiz Rel " << (current_info_.status.estimator_status.pred_pos_horiz_rel_status_flag ? "[√]   " : "[X]   ") 
-                << "pre Horiz Abs " << (current_info_.status.estimator_status.pred_pos_horiz_abs_status_flag ? "[√]   " : "[X]   ") << std::endl;
+    std::cout << "Const Mode " << (current_info_.uav_status.estimator_status.const_pos_mode_status_flag ? "[√]   " : "[X]   ")
+               << "pre Horiz Rel " << (current_info_.uav_status.estimator_status.pred_pos_horiz_rel_status_flag ? "[√]   " : "[X]   ") 
+                << "pre Horiz Abs " << (current_info_.uav_status.estimator_status.pred_pos_horiz_abs_status_flag ? "[√]   " : "[X]   ") << std::endl;
 
     const double RAD2DEG = 57.295779513082320876846364344191;
     std::string frame_name;
@@ -172,11 +126,11 @@ void GcsDisplay::UavStateDisplay(void)
     }
     int setw_num = 9;
     std::cout << "--------------------------------Attitude Info--------------------------------" << std::endl;
-    std::cout << "Attitude Angle  [R P Y] : " << std::setw(setw_num) << current_info_.status.attitude_angle.x * RAD2DEG << " [ ° ] " << std::setw(setw_num) << current_info_.status.attitude_angle.y * RAD2DEG << " [ ° ] " << std::setw(setw_num) << current_info_.status.attitude_angle.z * RAD2DEG << " [ ° ] " << std::endl;
-    std::cout << "Attitude Rate   [R P Y] : " << std::setw(setw_num) << current_info_.status.attitude_rate.x  * RAD2DEG << " [°/s] " << std::setw(setw_num) << current_info_.status.attitude_rate.y  * RAD2DEG << " [°/s] " << std::setw(setw_num) << current_info_.status.attitude_rate.z  * RAD2DEG << " [°/s] " << std::endl;
+    std::cout << "Attitude Angle  [R P Y] : " << std::setw(setw_num) << current_info_.uav_status.attitude_angle.x * RAD2DEG << " [ ° ] " << std::setw(setw_num) << current_info_.uav_status.attitude_angle.y * RAD2DEG << " [ ° ] " << std::setw(setw_num) << current_info_.uav_status.attitude_angle.z * RAD2DEG << " [ ° ] " << std::endl;
+    std::cout << "Attitude Rate   [R P Y] : " << std::setw(setw_num) << current_info_.uav_status.attitude_rate.x  * RAD2DEG << " [°/s] " << std::setw(setw_num) << current_info_.uav_status.attitude_rate.y  * RAD2DEG << " [°/s] " << std::setw(setw_num) << current_info_.uav_status.attitude_rate.z  * RAD2DEG << " [°/s] " << std::endl;
     std::cout << "----------------------------Navigation Info [ENU]----------------------------" << std::endl;
-    std::cout << "FCU Position    [X Y Z] : " << std::setw(setw_num) << current_info_.status.position.x << " [ m ] " << std::setw(setw_num) << current_info_.status.position.y << " [ m ] " << std::setw(setw_num) << current_info_.status.position.z << " [ m ] " << std::endl;
-    std::cout << "FCU Velocity    [X Y Z] : " << std::setw(setw_num) << current_info_.status.velocity.x << " [m/s] " << std::setw(setw_num) << current_info_.status.velocity.y << " [m/s] " << std::setw(setw_num) << current_info_.status.velocity.z << " [m/s] " << std::endl;
+    std::cout << "FCU Position    [X Y Z] : " << std::setw(setw_num) << current_info_.uav_status.position.x << " [ m ] " << std::setw(setw_num) << current_info_.uav_status.position.y << " [ m ] " << std::setw(setw_num) << current_info_.uav_status.position.z << " [ m ] " << std::endl;
+    std::cout << "FCU Velocity    [X Y Z] : " << std::setw(setw_num) << current_info_.uav_status.velocity.x << " [m/s] " << std::setw(setw_num) << current_info_.uav_status.velocity.y << " [m/s] " << std::setw(setw_num) << current_info_.uav_status.velocity.z << " [m/s] " << std::endl;
     std::cout << "-------------------------------Command" << frame_name << "-------------------------------" << std::endl;
     std::cout << "Period: " << command_reception_.period  << " [s] " << " [ " << command_reception_.task_name << " ] ";
 
