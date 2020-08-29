@@ -55,28 +55,28 @@ void UavControl::Initialize(void)
                                                                             ros::TransportHints().tcpNoDelay());
     ros::NodeHandle nh("~");
     PidParameters param;
-    nh.param<float>("pid_xy/pos/kp", param.kp, 1.0);
-    nh.param<float>("pid_xy/pos/ki", param.ki, 0.0);
-    nh.param<float>("pid_xy/pos/kd", param.kd, 0.0);
-    nh.param<float>("pid_xy/pos/ff", param.ff, 0.0);
-    nh.param<float>("pid_xy/pos/error_max", param.error_max, 10.0);
-    nh.param<float>("pid_xy/pos/integral_max", param.integral_max, 5.0);
-    nh.param<float>("pid_xy/pos/output_max", param.output_max, 8.0);    //QGC XY速度最大期望默认10m/s
+    nh.param<float>("pid_xy/position/kp", param.kp, 1.0);
+    nh.param<float>("pid_xy/position/ki", param.ki, 0.0);
+    nh.param<float>("pid_xy/position/kd", param.kd, 0.0);
+    nh.param<float>("pid_xy/position/ff", param.ff, 0.0);
+    nh.param<float>("pid_xy/position/error_max", param.error_max, 10.0);
+    nh.param<float>("pid_xy/position/integral_max", param.integral_max, 5.0);
+    nh.param<float>("pid_xy/position/output_max", param.output_max, 8.0);    //QGC XY速度最大期望默认10m/s
     PoseX.SetParameters(param);
     PoseY.SetParameters(param);
-    nh.param<float>("pid_z/pos/kp", param.kp, 1.0);
-    nh.param<float>("pid_z/pos/ki", param.ki, 0.0);
-    nh.param<float>("pid_z/pos/kd", param.kd, 0.0);
-    nh.param<float>("pid_z/pos/ff", param.ff, 0.0);
-    nh.param<float>("pid_z/pos/error_max", param.error_max, 3.0);
-    nh.param<float>("pid_z/pos/integral_max", param.integral_max, 2.0);
-    nh.param<float>("pid_z/pos/output_max", param.output_max, 2.0);    //QGC Z速度最大上升默认3m/s 下降1m/s
+    nh.param<float>("pid_z/position/kp", param.kp, 1.0);
+    nh.param<float>("pid_z/position/ki", param.ki, 0.0);
+    nh.param<float>("pid_z/position/kd", param.kd, 0.0);
+    nh.param<float>("pid_z/position/ff", param.ff, 0.0);
+    nh.param<float>("pid_z/position/error_max", param.error_max, 3.0);
+    nh.param<float>("pid_z/position/integral_max", param.integral_max, 2.0);
+    nh.param<float>("pid_z/position/output_max", param.output_max, 2.0);    //QGC Z速度最大上升默认3m/s 下降1m/s
     PoseZ.SetParameters(param);
-    std::cout << "----------X Position controller parameters----------" << std::endl;
+    std::cout << "----------X position controller parameters----------" << std::endl;
     PoseX.PrintParameters();
-    std::cout << "----------Y Position controller parameters----------" << std::endl;
+    std::cout << "----------Y position controller parameters----------" << std::endl;
     PoseY.PrintParameters();
-    std::cout << "----------Z Position controller parameters----------" << std::endl;
+    std::cout << "----------Z position controller parameters----------" << std::endl;
     PoseZ.PrintParameters();
 }
 
@@ -89,7 +89,7 @@ void UavControl::CommandExecution(void)
 {
     // if(!command_reception_.update)    //如果指令没更新，则退出
     //     return;
-    //坐标系选择
+    /*坐标系选择，下面的指令只能用于LOCAL坐标系（因为某些指令控制用到参考坐标系反馈），若用BODY坐标系，需用速度控制指令或加速度控制指令*/
     switch(command_reception_.frame_id)
     {
         case px4_application::UavCommand::LOCAL:
@@ -108,7 +108,7 @@ void UavControl::CommandExecution(void)
             break;
         }
     }
-    //航向控制选择
+    /*航向控制选择*/
     switch(command_reception_.yaw_id)
     {
         case px4_application::UavCommand::NO_YAW:    //无航向指令
@@ -135,7 +135,7 @@ void UavControl::CommandExecution(void)
             break;
         }
     }
-    //位置速度控制选择
+    /*位置速度控制选择*/
     switch(command_reception_.xyz_id)    //注：建议在位置速度组合控制时，使用VX_VY_VZ模式，位置外环控制输出到速度内环
     {
         case px4_application::UavCommand::PX_PY_PZ:
