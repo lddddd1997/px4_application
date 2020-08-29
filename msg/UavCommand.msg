@@ -22,6 +22,6 @@ uint8 NO_YAW = 0
 uint8 YAW = 1
 uint8 YAW_RATE = 2
 
-uint8 frame_id #坐标系ID  PX4： NED  MAVROS： ENU  BODY:  Head X+  Right Y+  Down Z+
+uint8 frame_id #坐标系ID  PX4(Local: NED Body: Head X+  Right Y+  Down Z+)  MAVROS(Local: ENU Body: Head X+  Left Y+  Up Z+)
 uint8 LOCAL = 0 #常用
-uint8 BODY = 1
+uint8 BODY = 1 #用于机体系的速度或加速度控制
