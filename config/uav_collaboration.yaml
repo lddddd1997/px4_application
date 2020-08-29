@@ -12,6 +12,37 @@ assemble:
   y: -20.0
   z: 5.0
   
+## 追踪的相机坐标，X+前，Y+左，Z+上
+tracking:
+  x: 4.0
+  y: 0.0
+  z: -2.0
+  yaw: 0.0
+## 追踪的阈值
+threshold:
+  x: 0.1
+  y: 0.1
+  z: 0.1
+## 追踪的参数
+pid_xy:
+  tracking:
+    kp: 0.5
+    ki: 0.0
+    kd: 0.0
+    ff: 0.0
+    error_max: 3.0
+    integral_max: 2.0
+    output_max: 2.0
+pid_z:
+  tracking:
+    kp: 0.5
+    ki: 0.0
+    kd: 0.0
+    ff: 0.0
+    error_max: 3.0
+    integral_max: 2.0
+    output_max: 2.0
+
 ## 返航位置
 home:
   x: 0.0
