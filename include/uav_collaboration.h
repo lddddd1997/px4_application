@@ -21,7 +21,7 @@ private:
                        px4_application::UavCommand* _command_deliver,
                         States** _State) = 0;
 protected:
-    geometry_msgs::Vector3 reach_point_range_;
+    geometry_msgs::Vector3 reach_point_range;
 };
 
 class Prepare : public States
@@ -47,10 +47,10 @@ private:
                        px4_application::UavCommand* _command_deliver,
                         States** _State);
 
-    geometry_msgs::Vector3 takeoff_position_;
-    geometry_msgs::Vector3 takeoff_absolute_position_param_;    //绝对起飞位置
-    double takeoff_relative_height_param_;    //相对起飞高度
-    bool takeoff_id_;    //false绝对起飞 true相对起飞
+    geometry_msgs::Vector3 takeoff_position;
+    geometry_msgs::Vector3 takeoff_absolute_position_param;    //绝对起飞位置
+    double takeoff_relative_height_param;    //相对起飞高度
+    bool takeoff_id;    //false绝对起飞 true相对起飞
 };
 
 class Assemble : public States
@@ -63,7 +63,7 @@ private:
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State);
-    geometry_msgs::Vector3 assemble_position_;
+    geometry_msgs::Vector3 assemble_position;
 };
 
 class Tracking : public States
@@ -76,9 +76,9 @@ private:
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State);
-    geometry_msgs::Vector3 tracking_position_;    //相机坐标系下的追踪
-    double tracking_yaw_;
-    geometry_msgs::Vector3 tracking_threshold_;
+    geometry_msgs::Vector3 tracking_position;    //相机坐标系下的追踪
+    double tracking_yaw;
+    geometry_msgs::Vector3 tracking_threshold;
     PidController TrackingX;
     PidController TrackingY;
     PidController TrackingZ;
@@ -94,7 +94,7 @@ private:
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State);
-    geometry_msgs::Vector3 home_position_;
+    geometry_msgs::Vector3 home_position;
 };
 
 class Landing : public States
@@ -107,7 +107,7 @@ private:
                       const ros::Publisher& _uav_command_pub,
                        px4_application::UavCommand* _command_deliver,
                         States** _State);
-    geometry_msgs::Vector3 landing_pos_vel_;
+    geometry_msgs::Vector3 landing_pos_vel;
     
 };
 
@@ -131,11 +131,11 @@ public:
     
 private:
 
-    ros::Publisher uav_command_pub_;
+    ros::Publisher uav_command_pub;
 
-    px4_application::UavCommand command_deliver_;
-    StatusSubscriber current_info_;    //无人机和目标状态
-    States* UavState_;
+    px4_application::UavCommand command_deliver;
+    StatusSubscriber current_info;    //无人机和目标状态
+    States* UavState;
 
     void Initialize(void);
 

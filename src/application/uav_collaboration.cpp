@@ -18,17 +18,17 @@
 
 void UavCollaboration::LoopTask(void)
 {
-    UavState_->StateMachineSchedule(current_info_,
-                                     uav_command_pub_,
-                                      &command_deliver_,
-                                       &UavState_);    //运行状态机调度
+    this->UavState->StateMachineSchedule(this->current_info,
+                                          this->uav_command_pub,
+                                           &this->command_deliver,
+                                            &this->UavState);    //运行状态机调度
 }
 
 void UavCollaboration::Initialize(void)
 {
-    uav_command_pub_ = nh_.advertise<px4_application::UavCommand>("px4_application/uav_command", 10);
+    this->uav_command_pub = this->nh.advertise<px4_application::UavCommand>("px4_application/uav_command", 10);
 
-    UavState_ = new Prepare;    //初始为准备状态
+    this->UavState = new Prepare;    //初始为准备状态
 }
 
 UavCollaboration::UavCollaboration(const ros::NodeHandle& _nh, double _period) : RosBase(_nh, _period)
@@ -38,10 +38,10 @@ UavCollaboration::UavCollaboration(const ros::NodeHandle& _nh, double _period) :
 
 UavCollaboration::~UavCollaboration()
 {
-    if(UavState_ != NULL)
+    if(this->UavState != NULL)
     {
-        delete UavState_;
-        UavState_ = NULL;
+        delete this->UavState;
+        this->UavState = NULL;
     }
 }
 
@@ -68,9 +68,9 @@ void States::StateMachineSchedule(const StatusSubscriber& _current_info,
 States::States()
 {
     ros::NodeHandle nh("~");
-    nh.param<double>("range/x", reach_point_range_.x, 0.1);
-    nh.param<double>("range/y", reach_point_range_.y, 0.1);
-    nh.param<double>("range/z", reach_point_range_.z, 0.1);
+    nh.param<double>("range/x", this->reach_point_range.x, 0.1);
+    nh.param<double>("range/y", this->reach_point_range.y, 0.1);
+    nh.param<double>("range/z", this->reach_point_range.z, 0.1);
 }
 
 States::~States()
@@ -105,13 +105,13 @@ void Prepare::Run(const StatusSubscriber& _current_info,
         _command_deliver->update = true;
         _command_deliver->xyz_id = px4_application::UavCommand::UX_UY_UZ;
         _command_deliver->task_name = "Prepare";
-        _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设置为初始航向，起飞状态也会设置，在此设置是为了防止忽略起飞状态，直接跳到其他状态
+        _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设置初始航向，起飞状态也会设置，在此设置是为了防止忽略起飞状态，直接跳到其他状态
         _uav_command_pub.publish(*_command_deliver);
         return ;
     }
     delete *_State;
-    // *_State = new TakeOff;    //状态转移
-    *_State = new Tracking;    //实验直接切换到追踪状态
+    *_State = new TakeOff;    //状态转移
+    // *_State = new Tracking;    //实验直接切换到追踪状态
 
 }
 
@@ -153,24 +153,24 @@ void TakeOff::Run(const StatusSubscriber& _current_info,
 
     if(_current_info.uav_status.extended_state.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND)
     {
-        if(takeoff_id_)
+        if(this->takeoff_id)
         {
-            takeoff_position_.x = _current_info.uav_status.position.x;
-            takeoff_position_.y = _current_info.uav_status.position.y;
-            takeoff_position_.z = _current_info.uav_status.position.z + takeoff_relative_height_param_;
+            this->takeoff_position.x = _current_info.uav_status.position.x;
+            this->takeoff_position.y = _current_info.uav_status.position.y;
+            this->takeoff_position.z = _current_info.uav_status.position.z + this->takeoff_relative_height_param;
         }
         else
         {
-            takeoff_position_.x = takeoff_absolute_position_param_.x;
-            takeoff_position_.y = takeoff_absolute_position_param_.y;
-            takeoff_position_.z = takeoff_absolute_position_param_.z;
+            this->takeoff_position.x = this->takeoff_absolute_position_param.x;
+            this->takeoff_position.y = this->takeoff_absolute_position_param.y;
+            this->takeoff_position.z = this->takeoff_absolute_position_param.z;
         }
         _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设置为初始航向
     }
 
-    if(!(abs(_current_info.uav_status.position.x - takeoff_position_.x) < reach_point_range_.x &&
-          abs(_current_info.uav_status.position.y - takeoff_position_.y) < reach_point_range_.y &&
-           abs(_current_info.uav_status.position.z - takeoff_position_.z) < reach_point_range_.z))    //认为起飞未完成
+    if(!(abs(_current_info.uav_status.position.x - this->takeoff_position.x) < this->reach_point_range.x &&
+          abs(_current_info.uav_status.position.y - this->takeoff_position.y) < this->reach_point_range.y &&
+           abs(_current_info.uav_status.position.z - this->takeoff_position.z) < this->reach_point_range.z))    //认为起飞未完成
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -178,9 +178,9 @@ void TakeOff::Run(const StatusSubscriber& _current_info,
         _command_deliver->xyz_id = px4_application::UavCommand::PX_PY_PZ;
         _command_deliver->yaw_id = px4_application::UavCommand::YAW;
         _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
-        _command_deliver->x = takeoff_position_.x;
-        _command_deliver->y = takeoff_position_.y;
-        _command_deliver->z = takeoff_position_.z;
+        _command_deliver->x = this->takeoff_position.x;
+        _command_deliver->y = this->takeoff_position.y;
+        _command_deliver->z = this->takeoff_position.z;
         // _command_deliver->yaw = 0;
         _command_deliver->task_name = "TakeOff";
         _uav_command_pub.publish(*_command_deliver);
@@ -194,11 +194,11 @@ void TakeOff::Run(const StatusSubscriber& _current_info,
 TakeOff::TakeOff()
 {
     ros::NodeHandle nh("~");
-    nh.param<bool>("take_off/id", takeoff_id_, true);
-    nh.param<double>("take_off/x", takeoff_absolute_position_param_.x, 0.0);
-    nh.param<double>("take_off/y", takeoff_absolute_position_param_.y, 0.0);
-    nh.param<double>("take_off/z", takeoff_absolute_position_param_.z, 1.0);
-    nh.param<double>("take_off/h", takeoff_relative_height_param_, 1.0);
+    nh.param<bool>("take_off/id", this->takeoff_id, true);
+    nh.param<double>("take_off/x", this->takeoff_absolute_position_param.x, 0.0);
+    nh.param<double>("take_off/y", this->takeoff_absolute_position_param.y, 0.0);
+    nh.param<double>("take_off/z", this->takeoff_absolute_position_param.z, 1.0);
+    nh.param<double>("take_off/h", this->takeoff_relative_height_param, 1.0);
 
     std::cout << "[ Take off ]" << std::endl;
 }
@@ -225,9 +225,9 @@ void Assemble::Run(const StatusSubscriber& _current_info,
                      px4_application::UavCommand* _command_deliver,
                       States** _State)
 {
-    if(!(abs(_current_info.uav_status.position.x - assemble_position_.x) < reach_point_range_.x &&
-          abs(_current_info.uav_status.position.y - assemble_position_.y) < reach_point_range_.y &&
-           abs(_current_info.uav_status.position.z - assemble_position_.z) < reach_point_range_.z))
+    if(!(abs(_current_info.uav_status.position.x - this->assemble_position.x) < this->reach_point_range.x &&
+          abs(_current_info.uav_status.position.y - this->assemble_position.y) < this->reach_point_range.y &&
+           abs(_current_info.uav_status.position.z - this->assemble_position.z) < this->reach_point_range.z))
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -235,9 +235,9 @@ void Assemble::Run(const StatusSubscriber& _current_info,
         _command_deliver->xyz_id = px4_application::UavCommand::PX_PY_PZ;
         _command_deliver->yaw_id = px4_application::UavCommand::YAW;
         _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
-        _command_deliver->x = assemble_position_.x;
-        _command_deliver->y = assemble_position_.y;
-        _command_deliver->z = assemble_position_.z;
+        _command_deliver->x = this->assemble_position.x;
+        _command_deliver->y = this->assemble_position.y;
+        _command_deliver->z = this->assemble_position.z;
         // _command_deliver->yaw = lock_yaw_;
         _command_deliver->task_name = "Assemble";
         _uav_command_pub.publish(*_command_deliver);
@@ -245,15 +245,15 @@ void Assemble::Run(const StatusSubscriber& _current_info,
     }
 
     delete *_State;
-    *_State = new Tracking;
+    *_State = new ReturnHome;
 }
 
 Assemble::Assemble()
 {
     ros::NodeHandle nh("~");
-    nh.param<double>("assemble/x", assemble_position_.x, 15.0);
-    nh.param<double>("assemble/y", assemble_position_.y, 15.0);
-    nh.param<double>("assemble/z", assemble_position_.z, 10.0);
+    nh.param<double>("assemble/x", this->assemble_position.x, 15.0);
+    nh.param<double>("assemble/y", this->assemble_position.y, 15.0);
+    nh.param<double>("assemble/z", this->assemble_position.z, 10.0);
 
     std::cout << "[ Assemble ]" << std::endl;
 }
@@ -280,6 +280,8 @@ void Tracking::Run(const StatusSubscriber& _current_info,
                      px4_application::UavCommand* _command_deliver,
                       States** _State)
 {
+    if(_current_info.uav_status.state.mode != "OFFBOARD")
+        _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设定航向
     static bool hold_flag = false;
     if(!_current_info.target_status.update)
     {
@@ -307,8 +309,8 @@ void Tracking::Run(const StatusSubscriber& _current_info,
     else
     {
         hold_flag = false;
-        if(abs(_current_info.target_status.position.y - tracking_position_.y) < tracking_threshold_.y
-            && abs(_current_info.target_status.position.z - tracking_position_.z) < tracking_threshold_.z)    //追踪小于阈值，保持速度为0
+        if(abs(_current_info.target_status.position.y - this->tracking_position.y) < this->tracking_threshold.y
+            && abs(_current_info.target_status.position.z - this->tracking_position.z) < this->tracking_threshold.z)    //追踪小于阈值，保持速度为0
         {
             _command_deliver->header.stamp = ros::Time::now();
             _command_deliver->period = 0.05;
@@ -331,9 +333,9 @@ void Tracking::Run(const StatusSubscriber& _current_info,
             _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
             _command_deliver->yaw_id = px4_application::UavCommand::YAW;
             _command_deliver->frame_id = px4_application::UavCommand::BODY;
-            _command_deliver->x = 0.0;
-            _command_deliver->y = TrackingY.ControlOutput(tracking_position_.y, _current_info.target_status.position.y);;
-            _command_deliver->z = TrackingZ.ControlOutput(tracking_position_.z, _current_info.target_status.position.z);;
+            _command_deliver->x = -this->TrackingX.ControlOutput(this->tracking_position.x, _current_info.target_status.position.x);
+            _command_deliver->y = -this->TrackingY.ControlOutput(this->tracking_position.y, _current_info.target_status.position.y);
+            _command_deliver->z = -this->TrackingZ.ControlOutput(this->tracking_position.z, _current_info.target_status.position.z);
             // _command_deliver->yaw = lock_yaw_;
             _command_deliver->task_name = "Tracking";
             _uav_command_pub.publish(*_command_deliver);
@@ -350,14 +352,14 @@ Tracking::Tracking() : TrackingX(PidController::NORMAL)
                          , TrackingZ(PidController::NORMAL)
 {
     ros::NodeHandle nh("~");
-    nh.param<double>("tracking/x", tracking_position_.x, 4.0);
-    nh.param<double>("tracking/y", tracking_position_.y, 0.0);
-    nh.param<double>("tracking/z", tracking_position_.z, 2.0);
-    nh.param<double>("tracking/yaw", tracking_yaw_, 0.0);
+    nh.param<double>("tracking/x", this->tracking_position.x, 4.0);
+    nh.param<double>("tracking/y", this->tracking_position.y, 0.0);
+    nh.param<double>("tracking/z", this->tracking_position.z, -2.0);
+    nh.param<double>("tracking/yaw", this->tracking_yaw, 0.0);
 
-    nh.param<double>("threshold/x", tracking_threshold_.x, 0.3);
-    nh.param<double>("threshold/y", tracking_threshold_.y, 0.3);
-    nh.param<double>("threshold/z", tracking_threshold_.z, 0.3);
+    nh.param<double>("threshold/x", this->tracking_threshold.x, 0.3);
+    nh.param<double>("threshold/y", this->tracking_threshold.y, 0.3);
+    nh.param<double>("threshold/z", this->tracking_threshold.z, 0.3);
 
     PidParameters param;
     nh.param<float>("pid_xy/tracking/kp", param.kp, 1.0);
@@ -367,8 +369,8 @@ Tracking::Tracking() : TrackingX(PidController::NORMAL)
     nh.param<float>("pid_xy/tracking/error_max", param.error_max, 10.0);
     nh.param<float>("pid_xy/tracking/integral_max", param.integral_max, 5.0);
     nh.param<float>("pid_xy/tracking/output_max", param.output_max, 8.0);    //QGC XY速度最大期望默认10m/s
-    TrackingX.SetParameters(param);
-    TrackingY.SetParameters(param);
+    this->TrackingX.SetParameters(param);
+    this->TrackingY.SetParameters(param);
     nh.param<float>("pid_z/tracking/kp", param.kp, 1.0);
     nh.param<float>("pid_z/tracking/ki", param.ki, 0.0);
     nh.param<float>("pid_z/tracking/kd", param.kd, 0.0);
@@ -376,13 +378,13 @@ Tracking::Tracking() : TrackingX(PidController::NORMAL)
     nh.param<float>("pid_z/tracking/error_max", param.error_max, 3.0);
     nh.param<float>("pid_z/tracking/integral_max", param.integral_max, 2.0);
     nh.param<float>("pid_z/tracking/output_max", param.output_max, 2.0);    //QGC Z速度最大上升默认3m/s 下降1m/s
-    TrackingZ.SetParameters(param);
+    this->TrackingZ.SetParameters(param);
     std::cout << "----------X tracking controller parameters----------" << std::endl;
-    TrackingX.PrintParameters();
+    this->TrackingX.PrintParameters();
     std::cout << "----------Y tracking controller parameters----------" << std::endl;
-    TrackingY.PrintParameters();
+    this->TrackingY.PrintParameters();
     std::cout << "----------Z tracking controller parameters----------" << std::endl;
-    TrackingZ.PrintParameters();
+    this->TrackingZ.PrintParameters();
 
     std::cout << "[ Tracking ]" << std::endl;
 }
@@ -409,9 +411,9 @@ void ReturnHome::Run(const StatusSubscriber& _current_info,
                        px4_application::UavCommand* _command_deliver,
                         States** _State)
 {
-    if(!(abs(_current_info.uav_status.position.x - home_position_.x) < reach_point_range_.x &&
-          abs(_current_info.uav_status.position.y - home_position_.y) < reach_point_range_.y &&
-           abs(_current_info.uav_status.position.z - home_position_.z) < reach_point_range_.z))
+    if(!(abs(_current_info.uav_status.position.x - this->home_position.x) < this->reach_point_range.x &&
+          abs(_current_info.uav_status.position.y - this->home_position.y) < this->reach_point_range.y &&
+           abs(_current_info.uav_status.position.z - this->home_position.z) < this->reach_point_range.z))
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -419,9 +421,9 @@ void ReturnHome::Run(const StatusSubscriber& _current_info,
         _command_deliver->xyz_id = px4_application::UavCommand::PX_PY_PZ;
         _command_deliver->yaw_id = px4_application::UavCommand::YAW;
         _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
-        _command_deliver->x = home_position_.x;
-        _command_deliver->y = home_position_.y;
-        _command_deliver->z = home_position_.z;
+        _command_deliver->x = this->home_position.x;
+        _command_deliver->y = this->home_position.y;
+        _command_deliver->z = this->home_position.z;
         // _command_deliver->yaw = lock_yaw_;
         _command_deliver->task_name = "Return";
         _uav_command_pub.publish(*_command_deliver);
@@ -435,9 +437,9 @@ void ReturnHome::Run(const StatusSubscriber& _current_info,
 ReturnHome::ReturnHome()
 {
     ros::NodeHandle nh("~");
-    nh.param<double>("home/x", home_position_.x, 0.0);
-    nh.param<double>("home/y", home_position_.y, 0.0);
-    nh.param<double>("home/z", home_position_.z, 5.0);
+    nh.param<double>("home/x", this->home_position.x, 0.0);
+    nh.param<double>("home/y", this->home_position.y, 0.0);
+    nh.param<double>("home/z", this->home_position.z, 5.0);
 
     std::cout << "[ ReturnHome ]" << std::endl;
 }
@@ -464,7 +466,7 @@ void Landing::Run(const StatusSubscriber& _current_info,
                     px4_application::UavCommand* _command_deliver,
                      States** _State)
 {
-    if(!(_current_info.uav_status.extended_state.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND && _current_info.uav_status.state.armed))    //未检测到着陆与上锁
+    if(!(_current_info.uav_status.extended_state.landed_state == mavros_msgs::ExtendedState::LANDED_STATE_ON_GROUND && !_current_info.uav_status.state.armed))    //未检测到着陆与上锁
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -472,9 +474,9 @@ void Landing::Run(const StatusSubscriber& _current_info,
         _command_deliver->xyz_id = px4_application::UavCommand::PX_PY_VZ;
         _command_deliver->yaw_id = px4_application::UavCommand::YAW;
         _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
-        _command_deliver->x = landing_pos_vel_.x;
-        _command_deliver->y = landing_pos_vel_.y;
-        _command_deliver->z = landing_pos_vel_.z;
+        _command_deliver->x = this->landing_pos_vel.x;
+        _command_deliver->y = this->landing_pos_vel.y;
+        _command_deliver->z = this->landing_pos_vel.z;
         // _command_deliver->yaw = lock_yaw_;
         _command_deliver->task_name = "Landing";
         _uav_command_pub.publish(*_command_deliver);
@@ -488,9 +490,9 @@ void Landing::Run(const StatusSubscriber& _current_info,
 Landing::Landing()
 {
     ros::NodeHandle nh("~");
-    nh.param<double>("landing/x", landing_pos_vel_.x, 0.0);
-    nh.param<double>("landing/y", landing_pos_vel_.y, 0.0);
-    nh.param<double>("landing/vz", landing_pos_vel_.z, -0.5);
+    nh.param<double>("landing/x", this->landing_pos_vel.x, 0.0);
+    nh.param<double>("landing/y", this->landing_pos_vel.y, 0.0);
+    nh.param<double>("landing/vz", this->landing_pos_vel.z, -0.5);
 
     std::cout << "[ Landing ]" << std::endl;
 }
