@@ -16,7 +16,7 @@ assemble:
 tracking:
   x: 4.0
   y: 0.0
-  z: -2.0
+  z: -1.0
   yaw: 0.0
 ## 追踪的阈值
 threshold:
@@ -30,7 +30,7 @@ pid_xy:
     ki: 0.0
     kd: 0.0
     ff: 0.0
-    error_max: 3.0
+    error_max: 5.0
     integral_max: 2.0
     output_max: 2.0
 pid_z:

@@ -6,7 +6,7 @@ pid_xy:
     ff: 0.0
     error_max: 8.0
     integral_max: 6.0
-    output_max: 2.5  #QGC XY速度最大期望默认10m/s
+    output_max: 2.0  #QGC XY速度最大期望默认10m/s
 pid_z:
   position:
     kp: 1.0
