@@ -8,22 +8,23 @@ class RosBase
 {
 public:
     RosBase(const ros::NodeHandle& _nh, double _period);
-    virtual ~RosBase(); //防止调用不到派生类的析构函数（派生类有堆区数据的情况）
+    virtual ~RosBase();    //防止调用不到派生类的析构函数（派生类有堆区数据的情况）
     
 protected:
-    ros::NodeHandle nh_;
+    ros::NodeHandle nh;
     virtual void LoopTask() = 0;    //纯虚函数，提供接口
 
 private:
-    ros::Timer loop_timer_;
-    double loop_period_;
+    ros::Timer loop_timer;
+    double loop_period;
+    
     void LoopTimerCallback(const ros::TimerEvent& event);
     virtual void Initialize(void);
 };
 
-RosBase::RosBase(const ros::NodeHandle& _nh, double _period):nh_(_nh), loop_period_(_period)
+RosBase::RosBase(const ros::NodeHandle& _nh, double _period) : nh(_nh), loop_period(_period)
 {
-    loop_timer_ = nh_.createTimer(ros::Duration(loop_period_), &RosBase::LoopTimerCallback, this);
+    this->loop_timer = this->nh.createTimer(ros::Duration(this->loop_period), &RosBase::LoopTimerCallback, this);
     Initialize();
 }
 

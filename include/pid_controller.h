@@ -44,21 +44,21 @@ public:
     float ControlOutput(float _expectation, float _feedback);
     void PrintParameters(void);
 private:
-    PidParameters param_;
-    ros::Time last_time_;
-    float expect_prev_;
-    float feedback_prev_;
-    float error_;
-    float error_prev_;
-    float integral_;
-    float delta_time_;
-    float output_;
-    Type pid_type_;
+    PidParameters param;
+    ros::Time last_time;
+    float expect_prev;
+    float feedback_prev;
+    float error;
+    float error_prev;
+    float integral;
+    float delta_time;
+    float output;
+    Type pid_type;
     float GetDeltaTime(const ros::Time& _last_time);
 };
 
-PidController::PidController(Type _pid_type) : last_time_(ros::Time::now()), expect_prev_(0.0), feedback_prev_(0.0), error_(0.0), error_prev_(0.0), 
-                                                integral_(0.0), delta_time_(0.01), output_(0.0), pid_type_(_pid_type)
+PidController::PidController(Type _pid_type) : last_time(ros::Time::now()), expect_prev(0.0), feedback_prev(0.0), error(0.0), error_prev(0.0), 
+                                                integral(0.0), delta_time(0.01), output(0.0), pid_type(_pid_type)
 {
 
 }
@@ -78,73 +78,73 @@ float PidController::GetDeltaTime(const ros::Time& _last_time)
 
 void PidController::SetParameters(const PidParameters& _param)
 {
-    param_ = _param;
+    this->param = _param;
 }
 
 void PidController::ResetIntegral(void)
 {
-    integral_ = 0.0;
+    this->integral = 0.0;
 }
 
 float PidController::ControlOutput(float _expectation, float _feedback)
 {
-    error_ = _expectation - _feedback;
-    error_ = MathUtils::Constrain(error_, param_.error_max);
-    delta_time_ = GetDeltaTime(last_time_);
+    this->error = _expectation - _feedback;
+    this->error = MathUtils::Constrain(this->error, this->param.error_max);
+    this->delta_time = GetDeltaTime(this->last_time);
 
-    integral_ += error_ * delta_time_;
-    integral_ = MathUtils::Constrain(integral_, param_.integral_max);
+    this->integral += this->error * this->delta_time;
+    this->integral = MathUtils::Constrain(this->integral, this->param.integral_max);
 
-    switch(pid_type_)
+    switch(this->pid_type)
     {
         case NORMAL:
         {
-            output_ = param_.kp * error_ 
-                     + param_.ki * integral_ 
-                      + param_.kd * (error_ - error_prev_) / delta_time_;
+            this->output = this->param.kp * this->error 
+                          + this->param.ki * this->integral 
+                           + this->param.kd * (this->error - this->error_prev) / this->delta_time;
             break;
         }
         case DIFF_FIRST:
         {
-            output_ = param_.kp * error_ 
-                     + param_.ki * integral_ 
-                      + param_.kd * (_feedback - feedback_prev_) / delta_time_;
+            this->output = this->param.kp * this->error 
+                          + this->param.ki * this->integral 
+                           + this->param.kd * (_feedback - this->feedback_prev) / this->delta_time;
             break;
         }
         case DIFF_FEED:
         {
-            output_ = param_.kp * error_ 
-                     + param_.ki * integral_ 
-                      + param_.kd * (_feedback - feedback_prev_) / delta_time_ 
-                       + param_.ff * (_expectation - expect_prev_) / delta_time_;
+            this->output = this->param.kp * this->error 
+                          + this->param.ki * this->integral 
+                           + this->param.kd * (_feedback - this->feedback_prev) / this->delta_time 
+                            + this->param.ff * (_expectation - this->expect_prev) / this->delta_time;
             break;
         }
         default:
         {
-            output_ = 0.0;
+            this->output = 0.0;
             break;
         }
     }
-    error_prev_ = error_;
-    expect_prev_ = _expectation;
-    feedback_prev_ = _feedback;
-    last_time_ = ros::Time::now();
+    this->error_prev = this->error;
+    this->expect_prev = _expectation;
+    this->feedback_prev = _feedback;
+    this->last_time = ros::Time::now();
 
-    output_ = MathUtils::Constrain(output_, param_.output_max);
-    return output_;
+    this->output = MathUtils::Constrain(this->output, this->param.output_max);
+    return this->output;
 }
 
 void PidController::PrintParameters(void)
 {
     // std::cout.setf(std::ios::fixed);
     // std::cout<<std::setprecision(1);
-    std::cout << "kp:  " << this->param_.kp << std::endl;
-    std::cout << "ki:  " << this->param_.ki << std::endl;
-    std::cout << "kd:  " << this->param_.kd << std::endl;
-    std::cout << "ff:  " << this->param_.ff << std::endl;
-    std::cout << "error_max:  " << this->param_.error_max << std::endl;
-    std::cout << "integral_max:  " << this->param_.integral_max << std::endl;
-    std::cout << "output_max:  " << this->param_.output_max << std::endl << std::endl;
+    std::cout << "kp:  " << this->param.kp << std::endl;
+    std::cout << "ki:  " << this->param.ki << std::endl;
+    std::cout << "kd:  " << this->param.kd << std::endl;
+    std::cout << "ff:  " << this->param.ff << std::endl;
+    std::cout << "error_max:  " << this->param.error_max << std::endl;
+    std::cout << "integral_max:  " << this->param.integral_max << std::endl;
+    std::cout << "output_max:  " << this->param.output_max << std::endl << std::endl;
 }
 
 #endif

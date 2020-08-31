@@ -15,14 +15,9 @@
 
 #include "gcs_setting.h"
 
-// void GcsSetting::LoopTimerCallback(const ros::TimerEvent& _event)
-// {
-
-// }
-
-void GcsSetting::UavStateCallback(const mavros_msgs::State::ConstPtr& _msg)
+void GcsSetting::StateCallback(const mavros_msgs::State::ConstPtr& _msg)
 {
-    current_state_uav_ = *_msg;
+    this->current_state_uav = *_msg;
 }
 
 void GcsSetting::LoopTask(void)
@@ -32,16 +27,14 @@ void GcsSetting::LoopTask(void)
 
 void GcsSetting::Initialize(void)
 {
-    control_mode_ = "POSCTL";
-    armed_cmd_ = false;
-    
-    // loop_timer_ = nh_.createTimer(ros::Duration(loop_period_), &GcsSetting::LoopTimerCallback, this);
-    uav_state_sub_ = nh_.subscribe<mavros_msgs::State>("mavros/state",
-                                                        10, &GcsSetting::UavStateCallback,
-                                                         this,
-                                                          ros::TransportHints().tcpNoDelay());
-    uav_set_mode_client_ = nh_.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
-    uav_arming_client_ = nh_.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
+    this->control_mode = "POSCTL";
+    this->armed_cmd = false;
+    this->uav_state_sub = this->nh.subscribe<mavros_msgs::State>("mavros/state",
+                                                                  10, &GcsSetting::StateCallback,
+                                                                   this,
+                                                                    ros::TransportHints().tcpNoDelay());
+    this->uav_set_mode_client = this->nh.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
+    this->uav_arming_client = this->nh.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
 }
 
 void GcsSetting::ModeSelect(void)
@@ -59,25 +52,25 @@ void GcsSetting::ModeSelect(void)
         std::cin >> mode_flag;
         switch(mode_flag)
         {
-            case 0: control_mode_ = "OFFBOARD"; break;
+            case 0: this->control_mode = "OFFBOARD"; break;
 
-            case 1: control_mode_ = "POSCTL"; break;
+            case 1: this->control_mode = "POSCTL"; break;
 
-            case 2: control_mode_ = "AUTO.RTL"; break;
+            case 2: this->control_mode = "AUTO.RTL"; break;
 
-            case 3: control_mode_ = "AUTO.LAND"; break;
+            case 3: this->control_mode = "AUTO.LAND"; break;
 
             default:std::cout << "Input error,please retry..." << std::endl; std::cout << std::endl; break;
         }
         if(mode_flag < 4)    //暂时设置四种模式
         {
             timeout_count= 0;
-            std::cout << "Setting to " << control_mode_ << " Mode..." << std::endl;
+            std::cout << "Setting to " << this->control_mode << " Mode..." << std::endl;
             ros::spinOnce();
-            while(current_state_uav_.mode != control_mode_)
+            while(this->current_state_uav.mode != this->control_mode)
             {
-                uav_mode_cmd_.request.custom_mode = control_mode_;
-                uav_set_mode_client_.call(uav_mode_cmd_);
+                this->uav_mode_cmd.request.custom_mode = this->control_mode;
+                this->uav_set_mode_client.call(this->uav_mode_cmd);
 
                 ros::spinOnce();
                 ros::Rate(10).sleep();
@@ -86,9 +79,9 @@ void GcsSetting::ModeSelect(void)
                     break;
             }
             if(timeout_count > 20)
-                std::cout << "Set to " << control_mode_ << " Mode Timeout!!!" << std::endl;
+                std::cout << "Set to " << this->control_mode << " Mode Timeout!!!" << std::endl;
             else
-                std::cout << "Set to " << control_mode_ << " Mode Susscess!!!" << std::endl;
+                std::cout << "Set to " << this->control_mode << " Mode Susscess!!!" << std::endl;
             std::cout << std::endl;
         } 
     }
@@ -98,23 +91,23 @@ void GcsSetting::ModeSelect(void)
         std::cin >> mode_flag;
         switch(mode_flag)
         {
-            case 0: armed_cmd_ = false; break;
+            case 0: this->armed_cmd = false; break;
 
-            case 1: armed_cmd_ = true; break;
+            case 1: this->armed_cmd = true; break;
             default:std::cout << "Input error,please retry..." << std::endl; break;
         }
         if(mode_flag < 2)
         {
             timeout_count = 0;
-            if(armed_cmd_)
+            if(this->armed_cmd)
                 std::cout << "Uav Armed..." << std::endl;
             else
                 std::cout << "Uav Disarmed..." << std::endl;
             ros::spinOnce();
-            while(current_state_uav_.armed != armed_cmd_)
+            while(this->current_state_uav.armed != this->armed_cmd)
             {
-                uav_arm_cmd_.request.value = armed_cmd_;
-                uav_arming_client_.call(uav_arm_cmd_);
+                this->uav_arm_cmd.request.value = this->armed_cmd;
+                this->uav_arming_client.call(this->uav_arm_cmd);
 
                 ros::spinOnce();
                 ros::Rate(10).sleep();
@@ -124,14 +117,14 @@ void GcsSetting::ModeSelect(void)
             }
             if(timeout_count > 20)
             {
-                if(armed_cmd_)
+                if(this->armed_cmd)
                     std::cout << "Armed Timeout!!!" << std::endl;
                 else
                     std::cout << "Disarmed Timeout!!!" << std::endl;
             }
             else
             {
-                if(armed_cmd_)
+                if(this->armed_cmd)
                     std::cout << "Armed Susscess!!!" << std::endl;
                 else
                     std::cout << "Disarmed Susscess!!!" << std::endl;

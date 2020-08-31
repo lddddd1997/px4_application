@@ -14,24 +14,20 @@ public:
     ~UavControl();
 
 private:
-    // ros::NodeHandle nh_;
-    // ros::Timer loop_timer_;
-    // double loop_period_;
-    ros::Publisher setpoint_raw_local_pub_;
-    ros::Subscriber uav_command_sub_;
-    ros::Subscriber uav_local_position_sub_;
+    ros::Publisher setpoint_raw_local_pub;
+    ros::Subscriber uav_command_sub;
+    ros::Subscriber uav_local_position_sub;
 
-    mavros_msgs::PositionTarget command_target_uav_;
-    px4_application::UavCommand command_reception_;
-    geometry_msgs::Vector3 local_position_uav_;
+    mavros_msgs::PositionTarget command_target_uav;
+    px4_application::UavCommand command_reception;
+    geometry_msgs::Vector3 local_position_uav;
 
-    PidController PoseX;
-    PidController PoseY;
-    PidController PoseZ;
+    PidController PositionX;
+    PidController PositionY;
+    PidController PositionZ;
 
-    // void LoopTimerCallback(const ros::TimerEvent& event);
-    void UavCommandCallback(const px4_application::UavCommand::ConstPtr& _msg);
-    void UavPositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg);
+    void CommandCallback(const px4_application::UavCommand::ConstPtr& _msg);
+    void PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg);
 
     void Initialize(void);
     void CommandUpdateReset(void);

@@ -12,14 +12,14 @@ public:
     ~GcsDisplay();
 
 private:
-    ros::Time begin_time_;
-    ros::Subscriber uav_command_sub_;
+    ros::Time begin_time;
+    ros::Subscriber uav_command_sub;
 
-    StatusSubscriber current_info_;    //无人机与目标状态
-    px4_application::UavCommand command_reception_;
+    StatusSubscriber current_info;    //无人机与目标状态
+    px4_application::UavCommand command_reception;
 
     float GetTimePassSec(void);
-    void UavCommandCallback(const px4_application::UavCommand::ConstPtr& _msg);
+    void CommandCallback(const px4_application::UavCommand::ConstPtr& _msg);
 
     void Initialize(void);
     void UavStateDisplay(void);

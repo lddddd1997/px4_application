@@ -13,21 +13,17 @@ public:
     ~GcsSetting();
     void ModeSelect(void);
 private:
-    // ros::NodeHandle nh_;
-    // ros::Timer loop_timer_;
-    // double loop_period_;
-    ros::Subscriber uav_state_sub_;
-    ros::ServiceClient uav_set_mode_client_;
-    ros::ServiceClient uav_arming_client_;
+    ros::Subscriber uav_state_sub;
+    ros::ServiceClient uav_set_mode_client;
+    ros::ServiceClient uav_arming_client;
 
-    mavros_msgs::State current_state_uav_;
-    std::string control_mode_;
-    bool armed_cmd_;
-    mavros_msgs::SetMode uav_mode_cmd_;
-    mavros_msgs::CommandBool uav_arm_cmd_;
+    mavros_msgs::State current_state_uav;
+    std::string control_mode;
+    bool armed_cmd;
+    mavros_msgs::SetMode uav_mode_cmd;
+    mavros_msgs::CommandBool uav_arm_cmd;
 
-    // void LoopTimerCallback(const ros::TimerEvent& event);
-    void UavStateCallback(const mavros_msgs::State::ConstPtr& _msg);
+    void StateCallback(const mavros_msgs::State::ConstPtr& _msg);
     void Initialize(void);
 
     virtual void LoopTask(void);

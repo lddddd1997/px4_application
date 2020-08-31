@@ -1,6 +1,7 @@
 #ifndef PX4_APPLICATION_MATH_UTILS_H_
 #define PX4_APPLICATION_MATH_UTILS_H_
 
+#include <math.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Quaternion.h>
 
