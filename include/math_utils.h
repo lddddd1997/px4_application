@@ -4,6 +4,7 @@
 #include <math.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Quaternion.h>
+#include <fstream>
 
 class MathUtils
 {
@@ -14,8 +15,9 @@ public:
     static T Constrain(T _data, T _max);
     template<typename T>
     static T Constrain(T _data, T _max, T _min);
-    static void Quaternion2Euler(const geometry_msgs::Quaternion &quat, geometry_msgs::Vector3& euler);
-    
+    static void Quaternion2Euler(const geometry_msgs::Quaternion& _quat, geometry_msgs::Vector3& _euler);
+    static void BodyHeading2Local(const geometry_msgs::Vector3& _body, geometry_msgs::Vector3& _local, double _yaw);
+    static void Local2BodyHeading(const geometry_msgs::Vector3& _local, geometry_msgs::Vector3& _body, double _yaw);
 private:
 };
 
@@ -60,12 +62,44 @@ T MathUtils::Constrain(T _data, T _max, T _min)
     }
 }
 
-void MathUtils::Quaternion2Euler(const geometry_msgs::Quaternion &quat, geometry_msgs::Vector3& euler)
+void MathUtils::Quaternion2Euler(const geometry_msgs::Quaternion& _quat, geometry_msgs::Vector3& _euler)
 {
-    euler.x = atan2(2.0 * (quat.z * quat.y + quat.w * quat.x), 1.0 - 2.0 * (quat.x * quat.x + quat.y * quat.y));
-    euler.y = asin(2.0 * (quat.y * quat.w - quat.z * quat.x));
-    euler.z = atan2(2.0 * (quat.z * quat.w + quat.x * quat.y), 1.0 - 2.0 * (quat.y * quat.y + quat.z * quat.z));
+    _euler.x = atan2(2.0 * (_quat.z * _quat.y + _quat.w * _quat.x), 1.0 - 2.0 * (_quat.x * _quat.x + _quat.y * _quat.y));
+    _euler.y = asin(2.0 * (_quat.y * _quat.w - _quat.z * _quat.x));
+    _euler.z = atan2(2.0 * (_quat.z * _quat.w + _quat.x * _quat.y), 1.0 - 2.0 * (_quat.y * _quat.y + _quat.z * _quat.z));
+}
 
+void MathUtils::BodyHeading2Local(const geometry_msgs::Vector3& _body, geometry_msgs::Vector3& _local, double _yaw)
+{
+    _local.x = _body.x * cos(_yaw) - _body.y * sin(_yaw);
+    _local.y = _body.x * sin(_yaw) + _body.y * cos(_yaw);
+    _local.z = _body.z;
+}
+
+void MathUtils:: Local2BodyHeading(const geometry_msgs::Vector3& _local, geometry_msgs::Vector3& _body, double _yaw)
+{
+    _body.x = _local.x * cos(_yaw) + _local.y * sin(_yaw);
+    _body.y = -_local.x * sin(_yaw) + _local.y * cos(_yaw);
+    _body.z = _local.z;
+}
+
+class FunctionUtils
+{
+public:
+    FunctionUtils();
+    ~FunctionUtils();
+    static void DataFileWrite(const geometry_msgs::Vector3& _data_0, const geometry_msgs::Vector3& _data_1, std::string _file_name);
+private:
+};
+
+void FunctionUtils::DataFileWrite(const geometry_msgs::Vector3& _data_0, const geometry_msgs::Vector3& _data_1, std::string _file_name)
+{
+    std::ofstream out_file;
+    out_file.open(_file_name, std::ios::app);
+
+    out_file << _data_0.x << "\t" << _data_0.y << "\t" << _data_0.z << "\t"
+             << _data_1.x << "\t" << _data_1.y << "\t" << _data_1.z << "\n";
+    out_file.close();
 }
 
 #endif
