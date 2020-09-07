@@ -11,7 +11,7 @@
 * @par      Edit history:
 *           1.0: lddddd, 2020.6.28, .
 *           2.0: lddddd, 2020.7.21, 更新节点句柄与topic的命名空间.
-* TODO:     Add collaboration and visual algorithms.
+* TODO:     Add collaboration.
 */
 
 #include "uav_collaboration.h"
@@ -155,9 +155,9 @@ void TakeOff::Run(const StatusSubscriber& _current_info,
     {
         if(this->takeoff_id)
         {
-            this->takeoff_position.x = _current_info.uav_status.position.x;
-            this->takeoff_position.y = _current_info.uav_status.position.y;
-            this->takeoff_position.z = _current_info.uav_status.position.z + this->takeoff_relative_height_param;
+            this->takeoff_position.x = _current_info.uav_status.local_position.x;
+            this->takeoff_position.y = _current_info.uav_status.local_position.y;
+            this->takeoff_position.z = _current_info.uav_status.local_position.z + this->takeoff_relative_height_param;
         }
         else
         {
@@ -168,9 +168,9 @@ void TakeOff::Run(const StatusSubscriber& _current_info,
         _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设置为初始航向
     }
 
-    if(!(abs(_current_info.uav_status.position.x - this->takeoff_position.x) < this->reach_point_range.x &&
-          abs(_current_info.uav_status.position.y - this->takeoff_position.y) < this->reach_point_range.y &&
-           abs(_current_info.uav_status.position.z - this->takeoff_position.z) < this->reach_point_range.z))    //认为起飞未完成
+    if(!(abs(_current_info.uav_status.local_position.x - this->takeoff_position.x) < this->reach_point_range.x &&
+          abs(_current_info.uav_status.local_position.y - this->takeoff_position.y) < this->reach_point_range.y &&
+           abs(_current_info.uav_status.local_position.z - this->takeoff_position.z) < this->reach_point_range.z))    //认为起飞未完成
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -225,9 +225,9 @@ void Assemble::Run(const StatusSubscriber& _current_info,
                      px4_application::UavCommand* _command_deliver,
                       States** _State)
 {
-    if(!(abs(_current_info.uav_status.position.x - this->assemble_position.x) < this->reach_point_range.x &&
-          abs(_current_info.uav_status.position.y - this->assemble_position.y) < this->reach_point_range.y &&
-           abs(_current_info.uav_status.position.z - this->assemble_position.z) < this->reach_point_range.z))
+    if(!(abs(_current_info.uav_status.local_position.x - this->assemble_position.x) < this->reach_point_range.x &&
+          abs(_current_info.uav_status.local_position.y - this->assemble_position.y) < this->reach_point_range.y &&
+           abs(_current_info.uav_status.local_position.z - this->assemble_position.z) < this->reach_point_range.z))
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
@@ -245,7 +245,7 @@ void Assemble::Run(const StatusSubscriber& _current_info,
     }
 
     delete *_State;
-    *_State = new ReturnHome;
+    *_State = new Tracking;
 }
 
 Assemble::Assemble()
@@ -280,67 +280,100 @@ void Tracking::Run(const StatusSubscriber& _current_info,
                      px4_application::UavCommand* _command_deliver,
                       States** _State)
 {
-    if(_current_info.uav_status.state.mode != "OFFBOARD")
-        _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设定航向
-    static bool hold_flag = false;
-    if(!_current_info.target_status.update)
+    if(this->debug_id)
     {
-        if(_current_info.uav_status.state.mode == "OFFBOARD" && !hold_flag)    //若目标信息没更新，则保持当前位置
-        {
-            _command_deliver->x = _current_info.uav_status.position.x;
-            _command_deliver->y = _current_info.uav_status.position.y;
-            _command_deliver->z = _current_info.uav_status.position.z;
-            hold_flag = true;
-        }
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;
         _command_deliver->update = true;
-        _command_deliver->xyz_id = px4_application::UavCommand::PX_PY_PZ;
+        _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
         _command_deliver->yaw_id = px4_application::UavCommand::YAW;
-        _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
-        // _command_deliver->x = _current_info.uav_status.position.x;
-        // _command_deliver->y = _current_info.uav_status.position.y;
-        // _command_deliver->z = _current_info.uav_status.position.z;
+        _command_deliver->frame_id = px4_application::UavCommand::BODY;
+        _command_deliver->x = this->tracking_position.x;
+        _command_deliver->y = this->tracking_position.y;
+        _command_deliver->z = this->tracking_position.z;
         // _command_deliver->yaw = lock_yaw_;
-        _command_deliver->task_name = "Target lost";
+        _command_deliver->task_name = "Debug";
         _uav_command_pub.publish(*_command_deliver);
+        if(_current_info.uav_status.state.mode == "OFFBOARD")
+        {
+            FunctionUtils::DataFileWrite(this->tracking_position, _current_info.uav_status.body_heading_velocity, this->saved_file_path + "debug_controller.txt");
+        }
         return ;
     }
     else
     {
-        hold_flag = false;
-        if(abs(_current_info.target_status.position.y - this->tracking_position.y) < this->tracking_threshold.y
-            && abs(_current_info.target_status.position.z - this->tracking_position.z) < this->tracking_threshold.z)    //追踪小于阈值，保持速度为0
+        if(_current_info.uav_status.state.mode != "OFFBOARD")
+            _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设定航向
+        static bool hold_flag = false;
+        // if(!_current_info.target_status.update)
+        // {
+        //     if(_current_info.uav_status.state.mode == "OFFBOARD" && !hold_flag)    //若目标信息没更新，则保持当前位置
+        //     {
+        //         _command_deliver->x = _current_info.uav_status.local_position.x;
+        //         _command_deliver->y = _current_info.uav_status.local_position.y;
+        //         _command_deliver->z = _current_info.uav_status.local_position.z;
+        //         hold_flag = true;
+        //     }
+        //     _command_deliver->header.stamp = ros::Time::now();
+        //     _command_deliver->period = 0.05;
+        //     _command_deliver->update = true;
+        //     _command_deliver->xyz_id = px4_application::UavCommand::PX_PY_PZ;
+        //     _command_deliver->yaw_id = px4_application::UavCommand::YAW;
+        //     _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
+        //     // _command_deliver->x = _current_info.uav_status.position.x;
+        //     // _command_deliver->y = _current_info.uav_status.position.y;
+        //     // _command_deliver->z = _current_info.uav_status.position.z;
+        //     // _command_deliver->yaw = lock_yaw_;
+        //     _command_deliver->task_name = "Target lost";
+        //     _uav_command_pub.publish(*_command_deliver);
+        //     return ;
+        // }
+        // else
         {
-            _command_deliver->header.stamp = ros::Time::now();
-            _command_deliver->period = 0.05;
-            _command_deliver->update = true;
-            _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
-            _command_deliver->yaw_id = px4_application::UavCommand::YAW;
-            _command_deliver->frame_id = px4_application::UavCommand::BODY;
-            _command_deliver->x = 0.0;
-            _command_deliver->y = 0.0;
-            _command_deliver->z = 0.0;
-            // _command_deliver->yaw = lock_yaw_;
-            _command_deliver->task_name = "Hold on";
-            _uav_command_pub.publish(*_command_deliver);
+            hold_flag = false;
+            if(abs(_current_info.target_status.camera_position.y - this->tracking_position.y) < this->tracking_threshold.y
+                && abs(_current_info.target_status.camera_position.z - this->tracking_position.z) < this->tracking_threshold.z)    //追踪小于阈值，保持速度为0
+            {
+                _command_deliver->header.stamp = ros::Time::now();
+                _command_deliver->period = 0.05;
+                _command_deliver->update = true;
+                _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
+                _command_deliver->yaw_id = px4_application::UavCommand::YAW;
+                _command_deliver->frame_id = px4_application::UavCommand::BODY;
+                _command_deliver->x = 0.0;
+                _command_deliver->y = 0.0;
+                _command_deliver->z = 0.0;
+                // _command_deliver->yaw = lock_yaw_;
+                _command_deliver->task_name = "Hold on";
+                _uav_command_pub.publish(*_command_deliver);
+            }
+            else
+            {
+                _command_deliver->header.stamp = ros::Time::now();
+                _command_deliver->period = 0.05;
+                _command_deliver->update = true;
+                _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
+                _command_deliver->yaw_id = px4_application::UavCommand::YAW;
+                _command_deliver->frame_id = px4_application::UavCommand::BODY;
+                _command_deliver->x = -this->TrackingX.ControlOutput(this->tracking_position.x, _current_info.target_status.camera_position.x);
+                _command_deliver->y = -this->TrackingY.ControlOutput(this->tracking_position.y, _current_info.target_status.camera_position.y);
+                _command_deliver->z = -this->TrackingZ.ControlOutput(this->tracking_position.z, _current_info.target_status.camera_position.z);
+                // _command_deliver->yaw = lock_yaw_;
+                _command_deliver->task_name = "Tracking";
+                _uav_command_pub.publish(*_command_deliver);
+                if(_current_info.uav_status.state.mode == "OFFBOARD")
+                {
+                    geometry_msgs::Vector3 saved_expect;
+                    saved_expect.x = _command_deliver->x;
+                    saved_expect.y = _command_deliver->y;
+                    saved_expect.z = _command_deliver->z;
+                    FunctionUtils::DataFileWrite(this->tracking_position, _current_info.target_status.camera_position, this->saved_file_path + "camera_tracking.txt");
+                    FunctionUtils::DataFileWrite(saved_expect, _current_info.uav_status.body_heading_velocity, this->saved_file_path + "controller_tracking.txt");
+                }
+                
+            }
+            return;
         }
-        else
-        {
-            _command_deliver->header.stamp = ros::Time::now();
-            _command_deliver->period = 0.05;
-            _command_deliver->update = true;
-            _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
-            _command_deliver->yaw_id = px4_application::UavCommand::YAW;
-            _command_deliver->frame_id = px4_application::UavCommand::BODY;
-            _command_deliver->x = -this->TrackingX.ControlOutput(this->tracking_position.x, _current_info.target_status.position.x);
-            _command_deliver->y = -this->TrackingY.ControlOutput(this->tracking_position.y, _current_info.target_status.position.y);
-            _command_deliver->z = -this->TrackingZ.ControlOutput(this->tracking_position.z, _current_info.target_status.position.z);
-            // _command_deliver->yaw = lock_yaw_;
-            _command_deliver->task_name = "Tracking";
-            _uav_command_pub.publish(*_command_deliver);
-        }
-        return ;
     }
     
     delete *_State;
@@ -352,6 +385,8 @@ Tracking::Tracking() : TrackingX(PidController::NORMAL)
                          , TrackingZ(PidController::NORMAL)
 {
     ros::NodeHandle nh("~");
+    nh.param<bool>("tracking/debug", this->debug_id, true);
+    nh.param<std::string>("tracking/saved_file_path", this->saved_file_path, "/home/ld/px4_ws/src/px4_application/");
     nh.param<double>("tracking/x", this->tracking_position.x, 4.0);
     nh.param<double>("tracking/y", this->tracking_position.y, 0.0);
     nh.param<double>("tracking/z", this->tracking_position.z, -2.0);
@@ -411,9 +446,9 @@ void ReturnHome::Run(const StatusSubscriber& _current_info,
                        px4_application::UavCommand* _command_deliver,
                         States** _State)
 {
-    if(!(abs(_current_info.uav_status.position.x - this->home_position.x) < this->reach_point_range.x &&
-          abs(_current_info.uav_status.position.y - this->home_position.y) < this->reach_point_range.y &&
-           abs(_current_info.uav_status.position.z - this->home_position.z) < this->reach_point_range.z))
+    if(!(abs(_current_info.uav_status.local_position.x - this->home_position.x) < this->reach_point_range.x &&
+          abs(_current_info.uav_status.local_position.y - this->home_position.y) < this->reach_point_range.y &&
+           abs(_current_info.uav_status.local_position.z - this->home_position.z) < this->reach_point_range.z))
     {
         _command_deliver->header.stamp = ros::Time::now();
         _command_deliver->period = 0.05;

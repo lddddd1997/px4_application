@@ -6,12 +6,13 @@
 * @author   lddddd
 *           Email: lddddd1997@gmail.com
 *           Github: https://github.com/lddddd1997
-* @date     2020.7.21
-* @version  2.0
+* @date     2020.9.07
+* @version  2.1
 * @par      Edit history:
 *           1.0: lddddd, 2020.5.24, .
 *           1.1: lddddd, 2020.7.06, 内部指令输入全部修改为速度输入.
 *           2.0: lddddd, 2020.7.21, 更新节点句柄与topic的命名空间.
+×           2.1: lddddd, 2020.9.07, 修正固件版本导致的Body heading坐标系下控制指令方向的错误(Firmware 1.9.2)Body: Head X+  Left Y+  Up Z+ (Firmware 1.10.1)Body: Head Y+  Right X+  Up Z+)注：以1.9.2为基准
 */
 
 #include "uav_control.h"
@@ -88,17 +89,17 @@ void UavControl::CommandExecution(void)
     {
         case px4_application::UavCommand::LOCAL:
         {
-            this->command_target_uav.coordinate_frame = 1;
+            this->command_target_uav.coordinate_frame = mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
             break;
         }
         case px4_application::UavCommand::BODY:
         {
-            this->command_target_uav.coordinate_frame = 8;
+            this->command_target_uav.coordinate_frame = mavros_msgs::PositionTarget::FRAME_BODY_NED;
             break;
         }
         default:
         {
-            this->command_target_uav.coordinate_frame = 1;
+            this->command_target_uav.coordinate_frame = mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
             break;
         }
     }
@@ -142,10 +143,20 @@ void UavControl::CommandExecution(void)
         }
         case px4_application::UavCommand::VX_VY_VZ:
         {
-            this->command_target_uav.type_mask |= 0b000111000111;    // 000 111 000 111
-            this->command_target_uav.velocity.x = this->command_reception.x;
-            this->command_target_uav.velocity.y = this->command_reception.y;
-            this->command_target_uav.velocity.z = this->command_reception.z;
+            this->command_target_uav.type_mask |= 0b000111000111;
+            /*修正固件版本导致的Body heading坐标系下控制指令方向的错误(Firmware 1.9.2)Body: Head X+  Left Y+  Up Z+ (Firmware 1.10.1)Body: Head Y+  Right X+  Up Z+)注：以1.9.2为基准*/
+            if(this->command_reception.frame_id == px4_application::UavCommand::BODY)
+            {
+                this->command_target_uav.velocity.x = -this->command_reception.y;
+                this->command_target_uav.velocity.y = this->command_reception.x;
+                this->command_target_uav.velocity.z = this->command_reception.z;
+            }
+            else
+            {
+                this->command_target_uav.velocity.x = this->command_reception.x;
+                this->command_target_uav.velocity.y = this->command_reception.y;
+                this->command_target_uav.velocity.z = this->command_reception.z;
+            }
             break;
         }
         case px4_application::UavCommand::VX_VY_PZ:
