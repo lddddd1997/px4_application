@@ -121,11 +121,27 @@ void GcsDisplay::UavStateDisplay(void)
     }
     int setw_num = 9;
     std::cout << "--------------------------------Attitude Info--------------------------------" << std::endl;
-    std::cout << "Attitude Angle  [R P Y] : " << std::setw(setw_num) << this->current_info.uav_status.attitude_angle.x * RAD2DEG << " [ ° ] " << std::setw(setw_num) << this->current_info.uav_status.attitude_angle.y * RAD2DEG << " [ ° ] " << std::setw(setw_num) << this->current_info.uav_status.attitude_angle.z * RAD2DEG << " [ ° ] " << std::endl;
-    std::cout << "Attitude Rate   [R P Y] : " << std::setw(setw_num) << this->current_info.uav_status.attitude_rate.x  * RAD2DEG << " [°/s] " << std::setw(setw_num) << this->current_info.uav_status.attitude_rate.y  * RAD2DEG << " [°/s] " << std::setw(setw_num) << this->current_info.uav_status.attitude_rate.z  * RAD2DEG << " [°/s] " << std::endl;
-    std::cout << "----------------------------Navigation Info [ENU]----------------------------" << std::endl;
-    std::cout << "FCU Position    [X Y Z] : " << std::setw(setw_num) << this->current_info.uav_status.position.x << " [ m ] " << std::setw(setw_num) << this->current_info.uav_status.position.y << " [ m ] " << std::setw(setw_num) << this->current_info.uav_status.position.z << " [ m ] " << std::endl;
-    std::cout << "FCU Velocity    [X Y Z] : " << std::setw(setw_num) << this->current_info.uav_status.velocity.x << " [m/s] " << std::setw(setw_num) << this->current_info.uav_status.velocity.y << " [m/s] " << std::setw(setw_num) << this->current_info.uav_status.velocity.z << " [m/s] " << std::endl;
+    std::cout << "Attitude Angle  [R P Y] : " 
+               << std::setw(setw_num) << this->current_info.uav_status.attitude_angle.x * RAD2DEG << " [ ° ] " 
+                << std::setw(setw_num) << this->current_info.uav_status.attitude_angle.y * RAD2DEG << " [ ° ] "
+                 << std::setw(setw_num) << this->current_info.uav_status.attitude_angle.z * RAD2DEG << " [ ° ] " << std::endl;
+    std::cout << "Attitude Rate   [R P Y] : "
+               << std::setw(setw_num) << this->current_info.uav_status.attitude_rate.x  * RAD2DEG << " [°/s] "
+                << std::setw(setw_num) << this->current_info.uav_status.attitude_rate.y  * RAD2DEG << " [°/s] "
+                 << std::setw(setw_num) << this->current_info.uav_status.attitude_rate.z  * RAD2DEG << " [°/s] " << std::endl;
+    std::cout << "-------------------------------Navigation Info-------------------------------" << std::endl;
+    std::cout << "LOCAL Position  [X Y Z] : "
+               << std::setw(setw_num) << this->current_info.uav_status.local_position.x << " [ m ] "
+                << std::setw(setw_num) << this->current_info.uav_status.local_position.y << " [ m ] "
+                 << std::setw(setw_num) << this->current_info.uav_status.local_position.z << " [ m ] " << std::endl;
+    std::cout << "LOCAL Velocity  [X Y Z] : "
+               << std::setw(setw_num) << this->current_info.uav_status.local_velocity.x << " [m/s] "
+                << std::setw(setw_num) << this->current_info.uav_status.local_velocity.y << " [m/s] "
+                 << std::setw(setw_num) << this->current_info.uav_status.local_velocity.z << " [m/s] " << std::endl;
+    std::cout << "BODY  Velocity  [X Y Z] : "    //指机体坐标映射到的参考系的水平方向（即参考系到机体系，只旋转了Z轴）
+               << std::setw(setw_num) << this->current_info.uav_status.body_heading_velocity.x << " [m/s] "
+                << std::setw(setw_num) << this->current_info.uav_status.body_heading_velocity.y << " [m/s] "
+                 << std::setw(setw_num) << this->current_info.uav_status.body_heading_velocity.z << " [m/s] " << std::endl;
     std::cout << "-------------------------------Command" << frame_name << "-------------------------------" << std::endl;
     std::cout << "Period: " << this->command_reception.period  << " [s] " << " [ " << this->command_reception.task_name << " ] ";
 
@@ -197,8 +213,11 @@ void GcsDisplay::UavStateDisplay(void)
         }
     }
     std::cout << std::endl;
-    std::cout << "Command Reception : " << std::setw(setw_num) << this->command_reception.x << " [X]" << std::setw(setw_num) << this->command_reception.y << " [Y]"
-               << std::setw(8) << this->command_reception.z << " [Z]" << std::setw(setw_num) << this->command_reception.yaw << " [Yaw]" << std::endl;
+    std::cout << "Command Reception : "
+               << std::setw(setw_num) << this->command_reception.x << " [X]"
+                << std::setw(setw_num) << this->command_reception.y << " [Y]"
+                 << std::setw(setw_num) << this->command_reception.z << " [Z]"
+                  << std::setw(setw_num) << this->command_reception.yaw << " [Yaw]" << std::endl;
     std::cout << std::endl;
 
     CommandUpdateReset();

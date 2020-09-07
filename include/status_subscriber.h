@@ -8,6 +8,7 @@
 #include <tf/transform_datatypes.h>
 #include "px4_application/UavStatus.h"
 #include "px4_application/TargetStatus.h"
+#include "math_utils.h"
 #include "MonoCamera/object.h"
 
 class StatusSubscriber
@@ -20,6 +21,10 @@ public:
 
 private:
     ros::NodeHandle nh;
+
+    /*matlab display*/
+    ros::Publisher matlab_pub;
+    geometry_msgs::PoseStamped matlab_target_data;
 
     /*目标*/
     ros::Subscriber target_sub;
@@ -79,6 +84,7 @@ StatusSubscriber::StatusSubscriber()
                                                                 &StatusSubscriber::TargetDetectCallback,
                                                                  this,
                                                                   ros::TransportHints().tcpNoDelay());
+    this->matlab_pub = this->nh.advertise<geometry_msgs::PoseStamped>("matlab/display/target", 10);
 }
 
 StatusSubscriber::~StatusSubscriber()
@@ -93,16 +99,17 @@ void StatusSubscriber::StateCallback(const mavros_msgs::State::ConstPtr& _msg)
 
 void StatusSubscriber::PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg)
 {
-    this->uav_status.position.x = _msg->pose.position.x;
-    this->uav_status.position.y = _msg->pose.position.y;
-    this->uav_status.position.z = _msg->pose.position.z;
+    this->uav_status.local_position.x = _msg->pose.position.x;
+    this->uav_status.local_position.y = _msg->pose.position.y;
+    this->uav_status.local_position.z = _msg->pose.position.z;
 }
 
 void StatusSubscriber::VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg)
 {
-    this->uav_status.velocity.x = _msg->twist.linear.x;
-    this->uav_status.velocity.y = _msg->twist.linear.y;
-    this->uav_status.velocity.z = _msg->twist.linear.z;
+    this->uav_status.local_velocity.x = _msg->twist.linear.x;
+    this->uav_status.local_velocity.y = _msg->twist.linear.y;
+    this->uav_status.local_velocity.z = _msg->twist.linear.z;
+    MathUtils::Local2BodyHeading(this->uav_status.local_velocity, this->uav_status.body_heading_velocity, this->uav_status.attitude_angle.z);
 }
 
 void StatusSubscriber::ImuCallback(const sensor_msgs::Imu::ConstPtr& _msg)
@@ -125,13 +132,18 @@ void StatusSubscriber::ExtendedStateCallback(const mavros_msgs::ExtendedState::C
     this->uav_status.extended_state = *_msg;
 }
 
-
 void StatusSubscriber::TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg)
 {
     this->target_status.update = _msg->isDetected;
-    this->target_status.position.x = _msg->object_position.x / 100.0;
-    this->target_status.position.y = _msg->object_position.y / 100.0;
-    this->target_status.position.z = _msg->object_position.z / 100.0;
+    this->target_status.camera_position.x = _msg->object_position.x / 100.0;
+    this->target_status.camera_position.y = _msg->object_position.y / 100.0;
+    this->target_status.camera_position.z = _msg->object_position.z / 100.0;
+
+    this->matlab_target_data.pose.position.x = this->target_status.camera_position.x;
+    this->matlab_target_data.pose.position.y = this->target_status.camera_position.y;
+    this->matlab_target_data.pose.position.z = this->target_status.camera_position.z;
+    this->matlab_target_data.pose.orientation.w = this->target_status.update;
+    this->matlab_pub.publish(this->matlab_target_data);
 }
 
 
