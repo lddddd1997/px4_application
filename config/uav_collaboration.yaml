@@ -12,9 +12,14 @@ assemble:
   y: -20.0
   z: 5.0
   
-## 追踪的相机坐标，X+前，Y+左，Z+上
+## 追踪的相机坐标，X+前，Y+左，Z+上，若为debug模式则为速度控制模式，否则为追踪
 tracking:
-  x: 4.0
+  debug: false #true为调试模式, x, y, z对应期望速度
+  saved_file_path: "/home/ld/px4_ws/src/px4_application/"
+  #x: 0.5
+  #y: 0.5
+  #z: 0.0
+  x: 3.0
   y: 0.0
   z: -1.0
   yaw: 0.0

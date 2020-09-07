@@ -82,6 +82,8 @@ private:
     PidController TrackingX;
     PidController TrackingY;
     PidController TrackingZ;
+    bool debug_id;
+    std::string saved_file_path;
 };
 
 class ReturnHome : public States
