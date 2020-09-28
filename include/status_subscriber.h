@@ -146,5 +146,165 @@ void StatusSubscriber::TargetDetectCallback(const MonoCamera::object::ConstPtr& 
     this->matlab_pub.publish(this->matlab_target_data);
 }
 
+class OtherSubscriber
+{
+public:
+    OtherSubscriber();
+    ~OtherSubscriber();
+    px4_application::UavStatus uav_status[5];
+private:
+    ros::NodeHandle nh;
+
+    /*无人机*/
+    ros::Subscriber local_position_sub[5];
+    ros::Subscriber local_velocity_sub[5];
+
+    void Uav0PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg);
+    void Uav0VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg);
+
+    void Uav1PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg);
+    void Uav1VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg);
+
+    void Uav2PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg);
+    void Uav2VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg);
+
+    void Uav3PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg);
+    void Uav3VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg);
+    
+    void Uav4PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg);
+    void Uav4VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg);
+
+    void Uav5PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg);
+    void Uav5VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg);
+};
+
+OtherSubscriber::OtherSubscriber()
+{
+    this->local_position_sub[0] = this->nh.subscribe<geometry_msgs::PoseStamped>("/uav0/mavros/local_position/pose",
+                                                                               10,
+                                                                                &OtherSubscriber::Uav0PositionCallback,
+                                                                                 this,
+                                                                                  ros::TransportHints().tcpNoDelay());
+    this->local_velocity_sub[0] = this->nh.subscribe<geometry_msgs::TwistStamped>("/uav0/mavros/local_position/velocity_local",
+                                                                                10,
+                                                                                 &OtherSubscriber::Uav0VelocityCallback,
+                                                                                  this,
+                                                                                   ros::TransportHints().tcpNoDelay());
+    this->local_position_sub[1] = this->nh.subscribe<geometry_msgs::PoseStamped>("/uav1/mavros/local_position/pose",
+                                                                               10,
+                                                                                &OtherSubscriber::Uav1PositionCallback,
+                                                                                 this,
+                                                                                  ros::TransportHints().tcpNoDelay());
+    this->local_velocity_sub[1] = this->nh.subscribe<geometry_msgs::TwistStamped>("/uav1/mavros/local_position/velocity_local",
+                                                                                10,
+                                                                                 &OtherSubscriber::Uav1VelocityCallback,
+                                                                                  this,
+                                                                                   ros::TransportHints().tcpNoDelay());
+    this->local_position_sub[2] = this->nh.subscribe<geometry_msgs::PoseStamped>("/uav2/mavros/local_position/pose",
+                                                                               10,
+                                                                                &OtherSubscriber::Uav2PositionCallback,
+                                                                                 this,
+                                                                                  ros::TransportHints().tcpNoDelay());
+    this->local_velocity_sub[2] = this->nh.subscribe<geometry_msgs::TwistStamped>("/uav2/mavros/local_position/velocity_local",
+                                                                                10,
+                                                                                 &OtherSubscriber::Uav2VelocityCallback,
+                                                                                  this,
+                                                                                   ros::TransportHints().tcpNoDelay());
+    this->local_position_sub[3] = this->nh.subscribe<geometry_msgs::PoseStamped>("/uav3/mavros/local_position/pose",
+                                                                               10,
+                                                                                &OtherSubscriber::Uav3PositionCallback,
+                                                                                 this,
+                                                                                  ros::TransportHints().tcpNoDelay());
+    this->local_velocity_sub[3] = this->nh.subscribe<geometry_msgs::TwistStamped>("/uav3/mavros/local_position/velocity_local",
+                                                                                10,
+                                                                                 &OtherSubscriber::Uav3VelocityCallback,
+                                                                                  this,
+                                                                                   ros::TransportHints().tcpNoDelay());
+    this->local_position_sub[4] = this->nh.subscribe<geometry_msgs::PoseStamped>("/uav4/mavros/local_position/pose",
+                                                                               10,
+                                                                                &OtherSubscriber::Uav4PositionCallback,
+                                                                                 this,
+                                                                                  ros::TransportHints().tcpNoDelay());
+    this->local_velocity_sub[4] = this->nh.subscribe<geometry_msgs::TwistStamped>("/uav4/mavros/local_position/velocity_local",
+                                                                                10,
+                                                                                 &OtherSubscriber::Uav4VelocityCallback,
+                                                                                  this,
+                                                                                   ros::TransportHints().tcpNoDelay());
+}
+
+OtherSubscriber::~OtherSubscriber()
+{
+
+}
+
+void OtherSubscriber::Uav0PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg)
+{
+    this->uav_status[0].local_position.x = _msg->pose.position.x;
+    this->uav_status[0].local_position.y = _msg->pose.position.y;
+    this->uav_status[0].local_position.z = _msg->pose.position.z;
+}
+
+void OtherSubscriber::Uav0VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg)
+{
+    this->uav_status[0].local_velocity.x = _msg->twist.linear.x;
+    this->uav_status[0].local_velocity.y = _msg->twist.linear.y;
+    this->uav_status[0].local_velocity.z = _msg->twist.linear.z;
+}
+
+void OtherSubscriber::Uav1PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg)
+{
+    this->uav_status[1].local_position.x = _msg->pose.position.x;
+    this->uav_status[1].local_position.y = _msg->pose.position.y;
+    this->uav_status[1].local_position.z = _msg->pose.position.z;
+}
+
+void OtherSubscriber::Uav1VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg)
+{
+    this->uav_status[1].local_velocity.x = _msg->twist.linear.x;
+    this->uav_status[1].local_velocity.y = _msg->twist.linear.y;
+    this->uav_status[1].local_velocity.z = _msg->twist.linear.z;
+}
+
+void OtherSubscriber::Uav2PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg)
+{
+    this->uav_status[2].local_position.x = _msg->pose.position.x;
+    this->uav_status[2].local_position.y = _msg->pose.position.y;
+    this->uav_status[2].local_position.z = _msg->pose.position.z;
+}
+
+void OtherSubscriber::Uav2VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg)
+{
+    this->uav_status[2].local_velocity.x = _msg->twist.linear.x;
+    this->uav_status[2].local_velocity.y = _msg->twist.linear.y;
+    this->uav_status[2].local_velocity.z = _msg->twist.linear.z;
+}
+
+void OtherSubscriber::Uav3PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg)
+{
+    this->uav_status[3].local_position.x = _msg->pose.position.x;
+    this->uav_status[3].local_position.y = _msg->pose.position.y;
+    this->uav_status[3].local_position.z = _msg->pose.position.z;
+}
+
+void OtherSubscriber::Uav3VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg)
+{
+    this->uav_status[3].local_velocity.x = _msg->twist.linear.x;
+    this->uav_status[3].local_velocity.y = _msg->twist.linear.y;
+    this->uav_status[3].local_velocity.z = _msg->twist.linear.z;
+}
+
+void OtherSubscriber::Uav4PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg)
+{
+    this->uav_status[4].local_position.x = _msg->pose.position.x;
+    this->uav_status[4].local_position.y = _msg->pose.position.y;
+    this->uav_status[4].local_position.z = _msg->pose.position.z;
+}
+
+void OtherSubscriber::Uav4VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg)
+{
+    this->uav_status[4].local_velocity.x = _msg->twist.linear.x;
+    this->uav_status[4].local_velocity.y = _msg->twist.linear.y;
+    this->uav_status[4].local_velocity.z = _msg->twist.linear.z;
+}
 
 #endif
