@@ -188,7 +188,8 @@ void TakeOff::Run(const StatusSubscriber& _current_info,
     }
 
     delete *_State;
-    *_State = new Assemble;
+    // *_State = new Assemble;
+    *_State = new Tracking;
 }
 
 TakeOff::TakeOff()
@@ -245,7 +246,8 @@ void Assemble::Run(const StatusSubscriber& _current_info,
     }
 
     delete *_State;
-    *_State = new Tracking;
+    // *_State = new Tracking;
+    *_State = new ReturnHome;
 }
 
 Assemble::Assemble()
@@ -301,90 +303,160 @@ void Tracking::Run(const StatusSubscriber& _current_info,
         return ;
     }
     else
-    {
-        if(_current_info.uav_status.state.mode != "OFFBOARD")
-            _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设定航向
-        static bool hold_flag = false;
-        // if(!_current_info.target_status.update)
-        // {
-        //     if(_current_info.uav_status.state.mode == "OFFBOARD" && !hold_flag)    //若目标信息没更新，则保持当前位置
-        //     {
-        //         _command_deliver->x = _current_info.uav_status.local_position.x;
-        //         _command_deliver->y = _current_info.uav_status.local_position.y;
-        //         _command_deliver->z = _current_info.uav_status.local_position.z;
-        //         hold_flag = true;
-        //     }
-        //     _command_deliver->header.stamp = ros::Time::now();
-        //     _command_deliver->period = 0.05;
-        //     _command_deliver->update = true;
-        //     _command_deliver->xyz_id = px4_application::UavCommand::PX_PY_PZ;
-        //     _command_deliver->yaw_id = px4_application::UavCommand::YAW;
-        //     _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
-        //     // _command_deliver->x = _current_info.uav_status.position.x;
-        //     // _command_deliver->y = _current_info.uav_status.position.y;
-        //     // _command_deliver->z = _current_info.uav_status.position.z;
-        //     // _command_deliver->yaw = lock_yaw_;
-        //     _command_deliver->task_name = "Target lost";
-        //     _uav_command_pub.publish(*_command_deliver);
-        //     return ;
-        // }
-        // else
+    {   
+        switch(this->own_id)
         {
-            hold_flag = false;
-            if(abs(_current_info.target_status.camera_position.y - this->tracking_position.y) < this->tracking_threshold.y
-                && abs(_current_info.target_status.camera_position.z - this->tracking_position.z) < this->tracking_threshold.z)    //追踪小于阈值，保持速度为0
+            /* 0号无人机追踪2号无人机 */
+            case 0: 
             {
-                _command_deliver->header.stamp = ros::Time::now();
-                _command_deliver->period = 0.05;
-                _command_deliver->update = true;
-                _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
-                _command_deliver->yaw_id = px4_application::UavCommand::YAW;
-                _command_deliver->frame_id = px4_application::UavCommand::BODY;
-                _command_deliver->x = 0.0;
-                _command_deliver->y = 0.0;
-                _command_deliver->z = 0.0;
-                // _command_deliver->yaw = lock_yaw_;
-                _command_deliver->task_name = "Hold on";
-                _uav_command_pub.publish(*_command_deliver);
-            }
-            else
-            {
-                _command_deliver->header.stamp = ros::Time::now();
-                _command_deliver->period = 0.05;
-                _command_deliver->update = true;
-                _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
-                _command_deliver->yaw_id = px4_application::UavCommand::YAW;
-                _command_deliver->frame_id = px4_application::UavCommand::BODY;
-                _command_deliver->x = -this->TrackingX.ControlOutput(this->tracking_position.x, _current_info.target_status.camera_position.x);
-                _command_deliver->y = -this->TrackingY.ControlOutput(this->tracking_position.y, _current_info.target_status.camera_position.y);
-                _command_deliver->z = -this->TrackingZ.ControlOutput(this->tracking_position.z, _current_info.target_status.camera_position.z);
-                // _command_deliver->yaw = lock_yaw_;
-                _command_deliver->task_name = "Tracking";
-                _uav_command_pub.publish(*_command_deliver);
-                if(_current_info.uav_status.state.mode == "OFFBOARD")
+                if(_current_info.uav_status.state.mode != "OFFBOARD")
                 {
-                    geometry_msgs::Vector3 saved_expect;
-                    saved_expect.x = _command_deliver->x;
-                    saved_expect.y = _command_deliver->y;
-                    saved_expect.z = _command_deliver->z;
-                    FunctionUtils::DataFileWrite(this->tracking_position, _current_info.target_status.camera_position, this->saved_file_path + "camera_tracking.txt");
-                    FunctionUtils::DataFileWrite(saved_expect, _current_info.uav_status.body_heading_velocity, this->saved_file_path + "controller_tracking.txt");
+                    _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设定航向
+                    _command_deliver->z = _current_info.uav_status.local_position.z;    //设定高度
                 }
                 
+                double output_x = 1.5 * (this->total_info.uav_status[2].local_position.x - _current_info.uav_status.local_position.x) + this->total_info.uav_status[2].local_velocity.x;
+                double output_y = 1.5 * (this->total_info.uav_status[2].local_position.y - _current_info.uav_status.local_position.y) + this->total_info.uav_status[2].local_velocity.y;
+                output_x = MathUtils::Constrain(output_x, 2.0);
+                output_y = MathUtils::Constrain(output_y, 2.0);
+
+                _command_deliver->header.stamp = ros::Time::now();
+                _command_deliver->period = 0.05;
+                _command_deliver->update = true;
+                _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_PZ;
+                _command_deliver->yaw_id = px4_application::UavCommand::YAW;
+                _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
+                _command_deliver->x = output_x;
+                _command_deliver->y = output_y;
+                // _command_deliver->z = this->total_info.uav_status[2].local_position.z;
+                // _command_deliver->yaw = 0;
+                _command_deliver->task_name = "Follow_2";
+                _uav_command_pub.publish(*_command_deliver);
+                return ;
             }
-            return;
+            break;
+            /* 1号无人机追踪2号无人机 */
+            case 1:
+            {
+                if(_current_info.uav_status.state.mode != "OFFBOARD")
+                {
+                    _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设定航向
+                    _command_deliver->z = _current_info.uav_status.local_position.z;    //设定高度
+                }
+
+                double output_x = 1.5 * (this->total_info.uav_status[2].local_position.x - _current_info.uav_status.local_position.x) + this->total_info.uav_status[2].local_velocity.x;
+                double output_y = 1.5 * (this->total_info.uav_status[2].local_position.y - _current_info.uav_status.local_position.y) + this->total_info.uav_status[2].local_velocity.y;
+                output_x = MathUtils::Constrain(output_x, 2.0);
+                output_y = MathUtils::Constrain(output_y, 2.0);
+
+                _command_deliver->header.stamp = ros::Time::now();
+                _command_deliver->period = 0.05;
+                _command_deliver->update = true;
+                _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_PZ;
+                _command_deliver->yaw_id = px4_application::UavCommand::YAW;
+                _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
+                _command_deliver->x = output_x;
+                _command_deliver->y = output_y;
+                // _command_deliver->z = this->total_info.uav_status[2].local_position.z;
+                // _command_deliver->yaw = 0;
+                _command_deliver->task_name = "Follow_2";
+                _uav_command_pub.publish(*_command_deliver);
+                return ;
+            }
+            break;
+            /* 2号无人机追踪数字牌 */
+            case 2:
+            {
+                // if(_current_info.uav_status.state.mode != "OFFBOARD")
+                //     _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设定航向
+                // static bool hold_flag = false;
+                // // if(!_current_info.target_status.update)
+                // // {
+                // //     if(_current_info.uav_status.state.mode == "OFFBOARD" && !hold_flag)    //若目标信息没更新，则保持当前位置
+                // //     {
+                // //         _command_deliver->x = _current_info.uav_status.local_position.x;
+                // //         _command_deliver->y = _current_info.uav_status.local_position.y;
+                // //         _command_deliver->z = _current_info.uav_status.local_position.z;
+                // //         hold_flag = true;
+                // //     }
+                // //     _command_deliver->header.stamp = ros::Time::now();
+                // //     _command_deliver->period = 0.05;
+                // //     _command_deliver->update = true;
+                // //     _command_deliver->xyz_id = px4_application::UavCommand::PX_PY_PZ;
+                // //     _command_deliver->yaw_id = px4_application::UavCommand::YAW;
+                // //     _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
+                // //     // _command_deliver->x = _current_info.uav_status.position.x;
+                // //     // _command_deliver->y = _current_info.uav_status.position.y;
+                // //     // _command_deliver->z = _current_info.uav_status.position.z;
+                // //     // _command_deliver->yaw = lock_yaw_;
+                // //     _command_deliver->task_name = "Target lost";
+                // //     _uav_command_pub.publish(*_command_deliver);
+                // //     return ;
+                // // }
+                // // else
+                // {
+                //     hold_flag = false;
+                //     // if(abs(_current_info.target_status.camera_position.y - this->tracking_position.y) < this->tracking_threshold.y
+                //     //     && abs(_current_info.target_status.camera_position.z - this->tracking_position.z) < this->tracking_threshold.z)    //追踪小于阈值，保持速度为0
+                //     // {
+                //     //     _command_deliver->header.stamp = ros::Time::now();
+                //     //     _command_deliver->period = 0.05;
+                //     //     _command_deliver->update = true;
+                //     //     _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
+                //     //     _command_deliver->yaw_id = px4_application::UavCommand::YAW;
+                //     //     _command_deliver->frame_id = px4_application::UavCommand::BODY;
+                //     //     _command_deliver->x = 0.0;
+                //     //     _command_deliver->y = 0.0;
+                //     //     _command_deliver->z = 0.0;
+                //     //     // _command_deliver->yaw = lock_yaw_;
+                //     //     _command_deliver->task_name = "Hold on";
+                //     //     _uav_command_pub.publish(*_command_deliver);
+                //     // }
+                //     // else
+                //     {
+                //         _command_deliver->header.stamp = ros::Time::now();
+                //         _command_deliver->period = 0.05;
+                //         _command_deliver->update = true;
+                //         _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_VZ;
+                //         _command_deliver->yaw_id = px4_application::UavCommand::YAW;
+                //         _command_deliver->frame_id = px4_application::UavCommand::BODY;
+                //         _command_deliver->x = -this->TrackingX.ControlOutput(this->tracking_position.x, _current_info.target_status.camera_position.x);
+                //         _command_deliver->y = -this->TrackingY.ControlOutput(this->tracking_position.y, _current_info.target_status.camera_position.y);
+                //         _command_deliver->z = -this->TrackingZ.ControlOutput(this->tracking_position.z, _current_info.target_status.camera_position.z);
+                //         // _command_deliver->yaw = lock_yaw_;
+                //         _command_deliver->task_name = "2_Tracking";
+                //         _uav_command_pub.publish(*_command_deliver);
+                //         if(_current_info.uav_status.state.mode == "OFFBOARD")
+                //         {
+                //             geometry_msgs::Vector3 saved_expect;
+                //             saved_expect.x = _command_deliver->x;
+                //             saved_expect.y = _command_deliver->y;
+                //             saved_expect.z = _command_deliver->z;
+                //             FunctionUtils::DataFileWrite(this->tracking_position, _current_info.target_status.camera_position, this->saved_file_path + "camera_tracking.txt");
+                //             FunctionUtils::DataFileWrite(saved_expect, _current_info.uav_status.body_heading_velocity, this->saved_file_path + "controller_tracking.txt");
+                //         }
+                        
+                //     }
+                //     return;
+                // }
+            }
+            break;
+            case 3: break;
+            case 4: break;
+            default: break;
         }
     }
     
     delete *_State;
-    *_State = new ReturnHome;
+    *_State = new Assemble;
 }
 
-Tracking::Tracking() : TrackingX(PidController::NORMAL)
-                        , TrackingY(PidController::NORMAL)
-                         , TrackingZ(PidController::NORMAL)
+Tracking::Tracking() : TrackingX(PidController::NORMAL),
+                        TrackingY(PidController::NORMAL),
+                         TrackingZ(PidController::NORMAL)
 {
     ros::NodeHandle nh("~");
+    nh.param<int>("uav_id", this->own_id, 0);
     nh.param<bool>("tracking/debug", this->debug_id, true);
     nh.param<std::string>("tracking/saved_file_path", this->saved_file_path, "/home/ld/px4_ws/src/px4_application/");
     nh.param<double>("tracking/x", this->tracking_position.x, 4.0);

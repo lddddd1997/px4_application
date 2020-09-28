@@ -83,7 +83,10 @@ private:
     PidController TrackingY;
     PidController TrackingZ;
     bool debug_id;
+    int own_id;
     std::string saved_file_path;
+    
+    OtherSubscriber total_info;    //所有无人机信息
 };
 
 class ReturnHome : public States
@@ -136,7 +139,8 @@ private:
     ros::Publisher uav_command_pub;
 
     px4_application::UavCommand command_deliver;
-    StatusSubscriber current_info;    //无人机和目标状态
+    StatusSubscriber current_info;    //本无人机和目标状态
+
     States* UavState;
 
     void Initialize(void);
