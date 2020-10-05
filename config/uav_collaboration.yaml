@@ -58,7 +58,7 @@ home:
 landing:
   x: 0.0
   y: 0.0
-  vz: -0.3
+  vz: -0.5 #降落速度
 
 ## 到点范围
 range:
