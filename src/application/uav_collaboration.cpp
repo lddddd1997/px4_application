@@ -359,7 +359,7 @@ void Tracking::Run(const StatusSubscriber& _current_info,
                 _command_deliver->y = output_y;
                 // _command_deliver->z = this->total_info.uav_status[2].local_position.z;
                 // _command_deliver->yaw = 0;
-                _command_deliver->task_name = "Follow_1";
+                _command_deliver->task_name = "Follow_3";
                 _uav_command_pub.publish(*_command_deliver);
                 return ;
             }
@@ -441,8 +441,63 @@ void Tracking::Run(const StatusSubscriber& _current_info,
                 // }
             }
             break;
-            case OtherSubscriber::uav_4 + 1: break;
-            case OtherSubscriber::uav_5 + 1: break;
+            /*4号无人机追踪3号无人机*/
+            case OtherSubscriber::uav_4 + 1:
+            {
+                if(_current_info.uav_status.state.mode != "OFFBOARD")
+                {
+                    _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设定航向
+                    _command_deliver->z = _current_info.uav_status.local_position.z;    //设定高度
+                }
+
+                double output_x = 1.5 * (this->total_info.uav_status[OtherSubscriber::uav_3].local_position.x - _current_info.uav_status.local_position.x) + this->total_info.uav_status[OtherSubscriber::uav_3].local_velocity.x;
+                double output_y = 1.5 * (this->total_info.uav_status[OtherSubscriber::uav_3].local_position.y - _current_info.uav_status.local_position.y) + this->total_info.uav_status[OtherSubscriber::uav_3].local_velocity.y;
+                output_x = MathUtils::Constrain(output_x, 2.0);
+                output_y = MathUtils::Constrain(output_y, 2.0);
+
+                _command_deliver->header.stamp = ros::Time::now();
+                _command_deliver->period = 0.05;
+                _command_deliver->update = true;
+                _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_PZ;
+                _command_deliver->yaw_id = px4_application::UavCommand::YAW;
+                _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
+                _command_deliver->x = output_x;
+                _command_deliver->y = output_y;
+                // _command_deliver->z = this->total_info.uav_status[2].local_position.z;
+                // _command_deliver->yaw = 0;
+                _command_deliver->task_name = "Follow_3";
+                _uav_command_pub.publish(*_command_deliver);
+                return ;
+            }
+            break;
+            case OtherSubscriber::uav_5 + 1:
+            {
+                if(_current_info.uav_status.state.mode != "OFFBOARD")
+                {
+                    _command_deliver->yaw = _current_info.uav_status.attitude_angle.z;    //设定航向
+                    _command_deliver->z = _current_info.uav_status.local_position.z;    //设定高度
+                }
+
+                double output_x = 1.5 * (this->total_info.uav_status[OtherSubscriber::uav_3].local_position.x - _current_info.uav_status.local_position.x) + this->total_info.uav_status[OtherSubscriber::uav_3].local_velocity.x;
+                double output_y = 1.5 * (this->total_info.uav_status[OtherSubscriber::uav_3].local_position.y - _current_info.uav_status.local_position.y) + this->total_info.uav_status[OtherSubscriber::uav_3].local_velocity.y;
+                output_x = MathUtils::Constrain(output_x, 2.0);
+                output_y = MathUtils::Constrain(output_y, 2.0);
+
+                _command_deliver->header.stamp = ros::Time::now();
+                _command_deliver->period = 0.05;
+                _command_deliver->update = true;
+                _command_deliver->xyz_id = px4_application::UavCommand::VX_VY_PZ;
+                _command_deliver->yaw_id = px4_application::UavCommand::YAW;
+                _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
+                _command_deliver->x = output_x;
+                _command_deliver->y = output_y;
+                // _command_deliver->z = this->total_info.uav_status[2].local_position.z;
+                // _command_deliver->yaw = 0;
+                _command_deliver->task_name = "Follow_3";
+                _uav_command_pub.publish(*_command_deliver);
+                return ;
+            }
+            break;
             default: break;
         }
     }
