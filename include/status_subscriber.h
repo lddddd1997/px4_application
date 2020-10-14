@@ -135,6 +135,7 @@ void StatusSubscriber::ExtendedStateCallback(const mavros_msgs::ExtendedState::C
 void StatusSubscriber::TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg)
 {
     this->target_status.update = _msg->isDetected;
+    this->target_status.number = _msg->object_number;
     this->target_status.camera_position.x = _msg->object_position.x / 100.0;
     this->target_status.camera_position.y = _msg->object_position.y / 100.0;
     this->target_status.camera_position.z = _msg->object_position.z / 100.0;
@@ -152,6 +153,7 @@ public:
     OtherSubscriber();
     ~OtherSubscriber();
     px4_application::UavStatus uav_status[5];
+    px4_application::TargetStatus target_status;
     enum
     {
         uav_1 = 0u,
@@ -181,6 +183,10 @@ private:
     
     void Uav5PositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg);
     void Uav5VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg);
+
+    /*目标*/
+    ros::Subscriber target_sub;
+    void TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg);
 
 };
 
@@ -236,6 +242,11 @@ OtherSubscriber::OtherSubscriber()
                                                                                         &OtherSubscriber::Uav5VelocityCallback,
                                                                                          this,
                                                                                           ros::TransportHints().tcpNoDelay());
+    this->target_sub = this->nh.subscribe<MonoCamera::object>("/uav3/object_pub",
+                                                               5,
+                                                                &OtherSubscriber::TargetDetectCallback,
+                                                                 this,
+                                                                  ros::TransportHints().tcpNoDelay());
 }
 
 OtherSubscriber::~OtherSubscriber()
@@ -311,6 +322,15 @@ void OtherSubscriber::Uav5VelocityCallback(const geometry_msgs::TwistStamped::Co
     this->uav_status[uav_5].local_velocity.x = _msg->twist.linear.x;
     this->uav_status[uav_5].local_velocity.y = _msg->twist.linear.y;
     this->uav_status[uav_5].local_velocity.z = _msg->twist.linear.z;
+}
+
+void OtherSubscriber::TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg)
+{
+    this->target_status.update = _msg->isDetected;
+    this->target_status.number = _msg->object_number;
+    this->target_status.camera_position.x = _msg->object_position.x / 100.0;
+    this->target_status.camera_position.y = _msg->object_position.y / 100.0;
+    this->target_status.camera_position.z = _msg->object_position.z / 100.0;
 }
 
 #endif
