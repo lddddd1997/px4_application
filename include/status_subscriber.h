@@ -9,7 +9,7 @@
 #include "px4_application/UavStatus.h"
 #include "px4_application/TargetStatus.h"
 #include "math_utils.h"
-#include "MonoCamera/object.h"
+// #include "MonoCamera/object.h"
 
 class StatusSubscriber
 {
@@ -27,9 +27,9 @@ private:
     geometry_msgs::PoseStamped matlab_target_data;
 
     /*目标*/
-    ros::Subscriber target_sub;
+    // ros::Subscriber target_sub;
 
-    void TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg);
+    // void TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg);
 
     /*无人机*/
     ros::Subscriber state_sub;
@@ -79,11 +79,11 @@ StatusSubscriber::StatusSubscriber()
                                                                                 &StatusSubscriber::ExtendedStateCallback,
                                                                                  this,
                                                                                   ros::TransportHints().tcpNoDelay());
-    this->target_sub = this->nh.subscribe<MonoCamera::object>("object_pub",
-                                                               5,
-                                                                &StatusSubscriber::TargetDetectCallback,
-                                                                 this,
-                                                                  ros::TransportHints().tcpNoDelay());
+    // this->target_sub = this->nh.subscribe<MonoCamera::object>("object_pub",
+    //                                                            5,
+    //                                                             &StatusSubscriber::TargetDetectCallback,
+    //                                                              this,
+    //                                                               ros::TransportHints().tcpNoDelay());
     this->matlab_pub = this->nh.advertise<geometry_msgs::PoseStamped>("matlab/display/target", 10);
 }
 
@@ -132,20 +132,20 @@ void StatusSubscriber::ExtendedStateCallback(const mavros_msgs::ExtendedState::C
     this->uav_status.extended_state = *_msg;
 }
 
-void StatusSubscriber::TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg)
-{
-    this->target_status.update = _msg->isDetected;
-    this->target_status.number = _msg->object_number;
-    this->target_status.camera_position.x = _msg->object_position.x / 100.0;
-    this->target_status.camera_position.y = _msg->object_position.y / 100.0;
-    this->target_status.camera_position.z = _msg->object_position.z / 100.0;
+// void StatusSubscriber::TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg)
+// {
+//     this->target_status.update = _msg->isDetected;
+//     this->target_status.number = _msg->object_number;
+//     this->target_status.camera_position.x = _msg->object_position.x / 100.0;
+//     this->target_status.camera_position.y = _msg->object_position.y / 100.0;
+//     this->target_status.camera_position.z = _msg->object_position.z / 100.0;
 
-    this->matlab_target_data.pose.position.x = this->target_status.camera_position.x;
-    this->matlab_target_data.pose.position.y = this->target_status.camera_position.y;
-    this->matlab_target_data.pose.position.z = this->target_status.camera_position.z;
-    this->matlab_target_data.pose.orientation.w = this->target_status.update;
-    this->matlab_pub.publish(this->matlab_target_data);
-}
+//     this->matlab_target_data.pose.position.x = this->target_status.camera_position.x;
+//     this->matlab_target_data.pose.position.y = this->target_status.camera_position.y;
+//     this->matlab_target_data.pose.position.z = this->target_status.camera_position.z;
+//     this->matlab_target_data.pose.orientation.w = this->target_status.update;
+//     this->matlab_pub.publish(this->matlab_target_data);
+// }
 
 class OtherSubscriber
 {
@@ -185,8 +185,8 @@ private:
     void Uav5VelocityCallback(const geometry_msgs::TwistStamped::ConstPtr& _msg);
 
     /*目标*/
-    ros::Subscriber target_sub;
-    void TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg);
+    // ros::Subscriber target_sub;
+    // void TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg);
 
 };
 
@@ -242,11 +242,11 @@ OtherSubscriber::OtherSubscriber()
                                                                                         &OtherSubscriber::Uav5VelocityCallback,
                                                                                          this,
                                                                                           ros::TransportHints().tcpNoDelay());
-    this->target_sub = this->nh.subscribe<MonoCamera::object>("/uav3/object_pub",
-                                                               5,
-                                                                &OtherSubscriber::TargetDetectCallback,
-                                                                 this,
-                                                                  ros::TransportHints().tcpNoDelay());
+    // this->target_sub = this->nh.subscribe<MonoCamera::object>("/uav3/object_pub",
+    //                                                            5,
+    //                                                             &OtherSubscriber::TargetDetectCallback,
+    //                                                              this,
+    //                                                               ros::TransportHints().tcpNoDelay());
 }
 
 OtherSubscriber::~OtherSubscriber()
@@ -324,13 +324,13 @@ void OtherSubscriber::Uav5VelocityCallback(const geometry_msgs::TwistStamped::Co
     this->uav_status[uav_5].local_velocity.z = _msg->twist.linear.z;
 }
 
-void OtherSubscriber::TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg)
-{
-    this->target_status.update = _msg->isDetected;
-    this->target_status.number = _msg->object_number;
-    this->target_status.camera_position.x = _msg->object_position.x / 100.0;
-    this->target_status.camera_position.y = _msg->object_position.y / 100.0;
-    this->target_status.camera_position.z = _msg->object_position.z / 100.0;
-}
+// void OtherSubscriber::TargetDetectCallback(const MonoCamera::object::ConstPtr& _msg)
+// {
+//     this->target_status.update = _msg->isDetected;
+//     this->target_status.number = _msg->object_number;
+//     this->target_status.camera_position.x = _msg->object_position.x / 100.0;
+//     this->target_status.camera_position.y = _msg->object_position.y / 100.0;
+//     this->target_status.camera_position.z = _msg->object_position.z / 100.0;
+// }
 
 #endif
