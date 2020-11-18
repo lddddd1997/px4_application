@@ -95,7 +95,7 @@ private:
 void FunctionUtils::DataFileWrite(const geometry_msgs::Vector3& _data_0, const geometry_msgs::Vector3& _data_1, std::string _file_name)
 {
     std::ofstream out_file;
-    out_file.open(_file_name, std::ios::app);
+    out_file.open(_file_name, std::ios_base::app);
 
     out_file << _data_0.x << "\t" << _data_0.y << "\t" << _data_0.z << "\t"
              << _data_1.x << "\t" << _data_1.y << "\t" << _data_1.z << "\n";
