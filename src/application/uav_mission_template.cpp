@@ -168,18 +168,18 @@ void TakeOff::Run(const StatusSubscriber& _current_info,
           abs(_current_info.uav_status.local_position.y - this->takeoff_position.y) < this->reach_point_range.y &&
            abs(_current_info.uav_status.local_position.z - this->takeoff_position.z) < this->reach_point_range.z))    //认为起飞未完成
     {
-        _command_deliver->header.stamp = ros::Time::now();
-        _command_deliver->period = 0.05;
-        _command_deliver->update = true;
-        _command_deliver->xyz_id = px4_application::UavCommand::PX_PY_PZ;
-        _command_deliver->yaw_id = px4_application::UavCommand::YAW;
-        _command_deliver->frame_id = px4_application::UavCommand::LOCAL;
-        _command_deliver->x = this->takeoff_position.x;
-        _command_deliver->y = this->takeoff_position.y;
-        _command_deliver->z = this->takeoff_position.z;
-        // _command_deliver->yaw = 0;
-        _command_deliver->task_name = "TakeOff";
-        _uav_command_pub.publish(*_command_deliver);
+        _command_deliver->header.stamp = ros::Time::now();    //发送时间戳
+        _command_deliver->period = 0.05;    //发送指令的周期，暂未用到
+        _command_deliver->update = true;    //指令是否更新
+        _command_deliver->xyz_id = px4_application::UavCommand::PX_PY_PZ;    //x y z的控制模式P对应位置控制，V对应速度控制，U未定义
+        _command_deliver->yaw_id = px4_application::UavCommand::YAW;    //是否进行航向控制
+        _command_deliver->frame_id = px4_application::UavCommand::LOCAL;    //控制坐标系选择
+        _command_deliver->x = this->takeoff_position.x;    //x的指令信息
+        _command_deliver->y = this->takeoff_position.y;    //y的指令信息
+        _command_deliver->z = this->takeoff_position.z;    //z的指令信息
+        // _command_deliver->yaw = 0;    //航向的指令信息
+        _command_deliver->task_name = "TakeOff";    //任务名为TakeOff
+        _uav_command_pub.publish(*_command_deliver);    //发送至飞控
         return ;
     }
 
