@@ -226,7 +226,7 @@ void UavControl::TrajerctoryCommandFixed(void)
         this->command_target_uav.header.stamp = ros::Time::now();
         this->setpoint_raw_local_pub.publish(this->command_target_uav);
     }
-    else // 使用轨迹控制，加速度输入
+    else // 使用轨迹控制，加速度输入，TODO：转化成姿态矩阵+推力的指令形式
     {
         this->command_target_uav.coordinate_frame = mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
         this->command_target_uav.type_mask = 0b100000111111;
