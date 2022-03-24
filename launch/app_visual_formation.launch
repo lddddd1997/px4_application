@@ -1,0 +1,15 @@
+<launch>
+    <arg name="uav_id" default="0"/>
+    <arg name="namespace" value="$(eval 'uav' + str(arg('uav_id')))"/>
+	<node pkg="px4_application" type="app_visual_formation" name="app_visual_formation" output="screen"  ns="$(arg namespace)">
+        <rosparam command="load" file="$(find px4_application)/config/mission_config/app_visual_formation.yaml" />
+        <rosparam command="load" file="$(find px4_application)/config/rate_config/spin_rate_config.yaml" />
+        <param name="uav_id" type="int" value="$(arg uav_id)" />
+    </node>
+
+    <!-- run the rviz -->
+	<!--<arg name="visualization" default="true"/>
+	<group if="$(arg visualization)">
+		<node type="rviz" name="rviz" pkg="rviz" args="-d $(find px4_application)/config/rviz_config/crossing.rviz" />
+    </group>-->
+</launch>

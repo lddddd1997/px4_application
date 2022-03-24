@@ -1,5 +1,7 @@
 <launch>
     <arg name="uav_id" default="0"/>
     <arg name="namespace" value="$(eval 'uav' + str(arg('uav_id')))"/>
-    <node pkg="px4_application" type="gcs_setting" name="gcs_setting" output="screen" ns="$(arg namespace)"/>
+    <node pkg="px4_application" type="gcs_setting" name="gcs_setting" output="screen" ns="$(arg namespace)">
+        <param name="uav_id" type="int" value="$(arg uav_id)" />
+    </node>
 </launch>

@@ -1,0 +1,74 @@
+## id false为绝对位置起飞，x y z绝对起飞位置，true为相对位置起飞，h相对起飞高度
+take_off:
+  id: true
+  x: 0.0
+  y: 0.0
+  z: 5.0
+  h: 2.0
+
+## 返航位置
+home:
+  x: 0.0
+  y: 0.0
+  z: 5.0
+
+## 降落位置
+landing:
+  x: 0.0
+  y: 0.0
+  vz: -0.5 #降落速度
+
+## 到点范围
+range:
+  x: 0.1
+  y: 0.1
+  z: 0.1
+
+
+# 轨迹时间分配的最大参数
+contraint:
+  vel_max: 2.0
+  acc_max: 2.0
+
+door_ref_info: # ...根据nums的数量设置door
+  # visual_formation_sim1.world
+  nums: 4
+  door0:
+    x: 9.0
+    y: 2.0
+    z: 1.5
+  door1:
+    x: 25.0
+    y: 8.0
+    z: 1.5
+  door2:
+    x: 20.0
+    y: 27.0
+    z: 1.5
+  door3:
+    x: 4.0
+    y: 21.0
+    z: 1.5
+    
+  # visual_formation_sim.world
+  # nums: 5
+  # door0:
+  #   x: 5.0
+  #   y: 5.0
+  #   z: 1.5
+  # door1:
+  #   x: 20.0
+  #   y: 5.0
+  #   z: 1.5
+  # door2:
+  #   x: 18.0
+  #   y: 23.0
+  #   z: 1.5
+  # door3:
+  #   x: 8.0
+  #   y: 26.0
+  #   z: 1.5
+  # door4:
+  #   x: 3.0
+  #   y: 13.0
+  #   z: 1.5

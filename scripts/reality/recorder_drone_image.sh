@@ -1,0 +1,2 @@
+gnome-terminal --window -e 'bash -c "rosrun image_view video_recorder image:=/uav2/detection_status/image; exec bash"' \
+--tab -e 'bash -c "sleep 1; rosrun image_view image_view image:=/uav2/detection_status/image; exec bash"' \

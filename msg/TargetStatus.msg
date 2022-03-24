@@ -1,6 +1,11 @@
 std_msgs/Header header
 
 bool update
-uint8 number
+# geometry_msgs/Quaternion orientation
 float32 yaw
-geometry_msgs/Vector3 camera_position
+int32 xmin
+int32 ymin
+int32 xmax
+int32 ymax
+geometry_msgs/Vector3 raw_pcl_position
+geometry_msgs/Vector3 filter_pcl_position

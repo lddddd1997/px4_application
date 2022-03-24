@@ -6,14 +6,15 @@
 * @author   lddddd
 *           Email: lddddd1997@gmail.com
 *           Github: https://github.com/lddddd1997
-* @date     2020.7.21
-* @version  2.0
+* @date     2021.1.06
+* @version  2.1
 * @par      Edit history:
 *           1.0: lddddd, 2020.5.24, .
 *           2.0: lddddd, 2020.7.21, 更新节点句柄与topic的命名空间.
+*           2.1: lddddd, 2021.1.06, 添加终端界面的无人机id显示.
 */
 
-#include "gcs_setting.h"
+#include "gcs/gcs_setting.h"
 
 void GcsSetting::StateCallback(const mavros_msgs::State::ConstPtr& _msg)
 {
@@ -25,8 +26,15 @@ void GcsSetting::LoopTask(void)
     // std::cout << "Virtual Loop Task of Derived Class !" << std::endl;
 }
 
+void GcsSetting::LoopTaskWithoutVirtual(void)
+{
+    this->ModeSelect();
+}
+
 void GcsSetting::Initialize(void)
 {
+    ros::NodeHandle nh("~");
+    nh.param<int>("uav_id", this->own_id, 0);
     this->control_mode = "POSCTL";
     this->armed_cmd = false;
     this->uav_state_sub = this->nh.subscribe<mavros_msgs::State>("mavros/state",
@@ -42,7 +50,7 @@ void GcsSetting::ModeSelect(void)
     int select_flag;
     int mode_flag;
     uint8_t timeout_count;
-    std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>gcs control<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " << std::endl;
+    std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>uav_" << this->own_id << " gcs<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " << std::endl;
     std::cout << "Input the selection:  0 for set mode,1 for arm or disarm..." << std::endl;
     std::cin >> select_flag;
 
@@ -154,13 +162,13 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "gcs_setting");
     ros::NodeHandle nh;
-    GcsSetting GcsSetting(nh, 0.1);
-    ros::Rate rate(10.0);
+    GcsSetting GcsSetting(nh, 1.0);
+    ros::Rate rate(20.0);
 
     while(ros::ok())
     {
         ros::spinOnce();
-        GcsSetting.ModeSelect();
+        GcsSetting.LoopTaskWithoutVirtual();
         rate.sleep();
     }
 

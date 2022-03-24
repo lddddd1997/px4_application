@@ -1,0 +1,15 @@
+<launch>
+    <arg name="uav_id" default="0"/>
+    <arg name="namespace" value="$(eval 'uav' + str(arg('uav_id')))"/>
+    
+	<node pkg="px4_application" type="door_detection" name="door_detection" output="screen"  ns="$(arg namespace)">
+        <rosparam command="load" file="$(find px4_application)/config/detection_config/door_detection.yaml" />
+        <rosparam command="load" file="$(find px4_application)/config/rate_config/spin_rate_config.yaml" />
+        <param name="uav_id" type="int" value="$(arg uav_id)" />
+    </node>
+    <!--<group ns="$(arg namespace)">
+        <include file="$(find usb_cam)/launch/usb_cam-test.launch">
+        </include>
+    </group>-->
+    
+</launch>

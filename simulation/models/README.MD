@@ -1,0 +1,2 @@
+将depth_camera_new lawn_plane door_2_1.2拷贝到px4源码的models
+typhoon_h480不能替换models里面的，否则会导致make px4_sitl gazebo_typhoon_h480错误

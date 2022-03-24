@@ -1,0 +1,38 @@
+# normal command
+pid_xy:
+  position:
+    kp: 1.5
+    ki: 0.0
+    kd: 0.0
+    ff: 0.0
+    error_max: 8.0
+    integral_max: 6.0
+    output_max: 0.5  #QGC XY速度最大期望默认10m/s
+pid_z:
+  position:
+    kp: 1.0
+    ki: 0.0
+    kd: 0.0
+    ff: 0.0
+    error_max: 3.0
+    integral_max: 2.0
+    output_max: 2.0  #QGC Z速度最大上升默认3m/s 下降1m/s
+
+# trajectory command
+use_position_control: false # false使用轨迹跟踪，true使用位置控制
+forward_sample_time: 0.3 # 轨迹跟踪前向采样时间，false 0.2，true 1.5  （欲增加速度则增加前向采样时间）
+traj:
+  kp_xy: 8.0
+  kp_z: 8.0
+  kv_xy: 1.5
+  kv_z: 3.3
+  ki: 0.0
+  integral_max: 10.0
+  feedback_acc_max: 8.0
+  # kp_xy: 10.0
+  # kp_z: 20.0
+  # kv_xy: 5.0
+  # kv_z: 10.0
+  # ki: 0.0
+  # integral_max: 10.0
+  # feedback_acc_max: 8.0

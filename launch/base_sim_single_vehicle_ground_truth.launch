@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Posix SITL environment launch script -->
+    <!-- launches PX4 SITL, Gazebo environment, and spawns vehicle -->
+    <!-- vehicle pose -->
+    <arg name="x" default="0"/>
+    <arg name="y" default="0"/>
+    <arg name="z" default="0"/>
+    <arg name="R" default="0"/>
+    <arg name="P" default="0"/>
+    <arg name="Y" default="0"/>
+    <!-- vehicle model and world -->
+    <arg name="est" default="ekf2"/>
+    <arg name="vehicle" default="iris"/>
+    <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/empty.world"/>
+    <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
+    <env name="PX4_SIM_MODEL" value="$(arg vehicle)" />
+    <env name="PX4_ESTIMATOR" value="$(arg est)" />
+
+    <!-- gazebo configs -->
+    <arg name="gui" default="true"/>
+    <arg name="debug" default="false"/>
+    <arg name="verbose" default="false"/>
+    <arg name="paused" default="false"/>
+    <arg name="respawn_gazebo" default="false"/>
+
+    <!-- PX4 configs -->
+    <arg name="interactive" default="true"/>
+
+    <!-- PX4 SITL -->
+    <arg unless="$(arg interactive)" name="px4_command_arg1" value="-d"/>
+    <arg     if="$(arg interactive)" name="px4_command_arg1" value=""/>
+
+    <!-- MAVROS configs -->
+    <arg name="fcu_url" default="udp://:14540@localhost:14557"/>
+
+    <!-- Uav ID -->
+    <arg name="uav_id" default="0"/>
+    <arg name="group_name" value="$(eval 'uav' + str(arg('uav_id')))"/>
+
+    <!-- Gazebo sim -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="world_name" value="$(arg world)"/>
+        <arg name="debug" value="$(arg debug)"/>
+        <arg name="verbose" value="$(arg verbose)"/>
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="respawn_gazebo" value="$(arg respawn_gazebo)"/>
+    </include>
+
+    <group ns="$(arg group_name)">
+        <!-- MAVROS and vehicle configs -->
+        <arg name="ID" value="0"/>
+        <!-- PX4 SITL and vehicle spawn -->
+        <include file="$(find px4)/launch/single_vehicle_spawn_sdf.launch">
+            <arg name="x" value="0"/>
+            <arg name="y" value="0"/>
+            <arg name="z" value="0"/>
+            <arg name="R" value="0"/>
+            <arg name="P" value="0"/>
+            <arg name="Y" value="0"/>
+            <arg name="vehicle" value="$(arg vehicle)"/>
+            <arg name="mavlink_udp_port" value="14560"/>
+            <arg name="mavlink_tcp_port" value="4560"/>
+            <arg name="ID" value="$(arg ID)"/>
+        </include>
+        <!-- MAVROS -->
+        <include file="$(find mavros)/launch/px4.launch">
+            <arg name="fcu_url" value="$(arg fcu_url)"/>
+            <arg name="gcs_url" value=""/>
+            <arg name="tgt_system" value="$(eval 1 + arg('ID'))"/>
+            <arg name="tgt_component" value="1"/>
+        </include>
+    </group>
+
+	<!-- run the rviz -->
+	<!-- arg name="visualization" default="true"/>
+	<group if="$(arg visualization)">
+		<node type="rviz" name="rviz" pkg="rviz" args="-d $(find px4_application)/config/rviz_config/trajectory_config.rviz" />
+    </group> -->
+    
+</launch>

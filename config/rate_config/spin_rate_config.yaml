@@ -1,0 +1,25 @@
+# leader_spin_rate:
+#   uav_control: 100
+#   visual_formation: 50
+#   traj_publisher: 100
+#   door_detection: 50
+#   gcs_display: 1
+
+# folower_spin_rate:
+#   uav_control: 100
+#   visual_formation: 50
+#   form_publisher: 100
+#   gcs_display: 1
+
+leader_spin_rate:
+  uav_control: 50
+  visual_formation: 20
+  traj_publisher: 50
+  door_detection: 50
+  gcs_display: 1
+
+folower_spin_rate:
+  uav_control: 50
+  visual_formation: 20
+  form_publisher: 50
+  gcs_display: 1

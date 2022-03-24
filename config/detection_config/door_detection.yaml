@@ -1,0 +1,59 @@
+use_video_cap: false
+video_input: 0
+topic_input: "/typhoon_h480_1/depth_camera/rgb/image_raw"
+timeout_threshold: 1 # 25
+
+use_video_writer: false
+video_save_path: "/home/amov/"
+
+param_path: "/home/p520c/Documents/px4_ws/src/px4_application/src/detection/sim.yaml" # sim
+out_length: 2.6
+out_width: 1.8
+in_length: 2.0
+in_width: 1.2
+# # in_length: 1.2
+# # in_width: 0.6
+
+# param_path: "/home/amov/ld_ws/px4_ws/src/px4_application/src/detection/long_shot.yaml" # real
+# out_length: 2.2 # big door
+# out_width: 1.8
+# in_length: 1.6
+# in_width: 1.2
+
+# out_length: 1.5 # small door
+# out_width: 0.9
+# in_length: 1.2
+# in_width: 0.6
+
+debug_switch: false
+# sim
+hsv_range1:
+  hmin: 0
+  smin: 70
+  vmin: 50
+  hmax: 15
+  smax: 255
+  vmax: 255
+hsv_range2:
+  hmin: 160
+  smin: 70
+  vmin: 50
+  hmax: 180
+  smax: 255
+  vmax: 255
+
+# real
+# hsv_range1:
+#   hmin: 0
+#   smin: 100
+#   vmin: 150
+#   hmax: 10
+#   smax: 255
+#   vmax: 255
+# hsv_range2:
+#   hmin: 170
+#   smin: 100
+#   vmin: 150
+#   hmax: 180
+#   smax: 255
+#   vmax: 255

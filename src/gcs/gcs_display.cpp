@@ -6,14 +6,15 @@
 * @author   lddddd
 *           Email: lddddd1997@gmail.com
 *           Github: https://github.com/lddddd1997
-* @date     2020.7.21
-* @version  2.0
+* @date     2021.1.06
+* @version  2.1
 * @par      Edit history:
 *           1.0: lddddd, 2020.5.24, .
 *           2.0: lddddd, 2020.7.21, 更新节点句柄与topic的命名空间.
+*           2.1: lddddd, 2021.1.06, 添加终端界面的无人机id显示.
 */
 
-#include "gcs_display.h"
+#include "gcs/gcs_display.h"
 
 void GcsDisplay::CommandCallback(const px4_application::UavCommand::ConstPtr& _msg)
 {
@@ -35,12 +36,29 @@ void GcsDisplay::CommandUpdateReset(void)
 
 void GcsDisplay::LoopTask(void)
 {
+    // UavStateDisplay();
+    // RvizTrajectoryDisplay();
+    // RvizPoseDisplay();
+    // cout << "Virtual Loop Task of Derived Class !" << endl;
+}
+
+void GcsDisplay::LoopTaskWithoutVirtual(void)
+{
     UavStateDisplay();
+    if(this->debug_pub)
+    {
+        RvizTrajectoryDisplay();
+        RvizPoseDisplay();
+    }
     // cout << "Virtual Loop Task of Derived Class !" << endl;
 }
 
 void GcsDisplay::Initialize(void)
 {
+    ros::NodeHandle nh("~");
+    nh.param<int>("uav_id", this->own_id, 0);
+    nh.param<bool>("debug_pub", this->debug_pub, false);
+    c_id = this->own_id + '0';
     this->begin_time = ros::Time::now();
     this->current_info.uav_status.state.mode = "UNKNOWN";
     this->command_reception.task_name = "UNKNOWN";
@@ -49,10 +67,58 @@ void GcsDisplay::Initialize(void)
                                                                               &GcsDisplay::CommandCallback,
                                                                                this,
                                                                                 ros::TransportHints().tcpNoDelay());
+    if(this->debug_pub)
+    {
+        this->rviz_trajectory_pub = this->nh.advertise<nav_msgs::Path>("rviz/trajectory/feedback", 10);
+        this->rviz_pose_pub = this->nh.advertise<geometry_msgs::PoseStamped>("rviz/pose/feedback", 10);
+
+        this->rviz_desired_trajectory_pub = this->nh.advertise<nav_msgs::Path>("rviz/trajectory/desired", 10);
+        this->rviz_desired_pose_pub = this->nh.advertise<geometry_msgs::PoseStamped>("rviz/pose/desired", 10);
+    }
 }
+
+void GcsDisplay::RvizTrajectoryDisplay(void)
+{
+    if(this->rviz_trajectory.poses.size() >= MAX_TRAJECTORY_BUF_SIZE)
+        this->rviz_trajectory.poses.erase(this->rviz_trajectory.poses.begin()); // 删除首个插入的元素
+
+    geometry_msgs::PoseStamped pose_stamp;
+    pose_stamp.pose = this->current_info.uav_status.quat_pos;
+    this->rviz_trajectory.poses.push_back(pose_stamp);
+    this->rviz_trajectory.header.stamp = ros::Time::now();
+    this->rviz_trajectory.header.frame_id = "world";
+    this->rviz_trajectory_pub.publish(this->rviz_trajectory);
+
+
+    if(this->rviz_desired_trajectory.poses.size() >= MAX_TRAJECTORY_BUF_SIZE)
+        this->rviz_desired_trajectory.poses.erase(this->rviz_desired_trajectory.poses.begin()); // 删除首个插入的元素
+
+    this->rviz_desired_trajectory.poses.push_back(pose_stamp);
+    this->rviz_desired_trajectory.header.stamp = ros::Time::now();
+    this->rviz_desired_trajectory.header.frame_id = "world";
+    this->rviz_desired_trajectory_pub.publish(this->rviz_desired_trajectory);
+
+}
+
+void GcsDisplay::RvizPoseDisplay(void)
+{
+    this->rviz_desired_pose.header.frame_id = this->nh.getNamespace() + "_camera"; // 转化前
+    this->rviz_desired_pose.header.stamp = ros::Time::now();
+    this->rviz_desired_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0.0, this->current_info.door_status.yaw, 0.0);
+    this->rviz_desired_pose.pose.position.x = this->current_info.door_status.raw_pcl_position.x;
+    this->rviz_desired_pose.pose.position.y = this->current_info.door_status.raw_pcl_position.y;
+    this->rviz_desired_pose.pose.position.z = this->current_info.door_status.raw_pcl_position.z;
+    this->rviz_desired_pose_pub.publish(this->rviz_desired_pose);
+
+    this->rviz_pose.header.frame_id = this->current_info.tf_door_status.header.frame_id; // 转化后
+    this->rviz_pose.header.stamp = ros::Time::now();
+    this->rviz_pose.pose.orientation = this->current_info.tf_door_status.pose.orientation;
+    this->rviz_pose.pose.position = this->current_info.tf_door_status.pose.position;
+    this->rviz_pose_pub.publish(this->rviz_pose);
+}
+
 void GcsDisplay::UavStateDisplay(void)
 {
-    std::cout << "---------------------------------State Info----------------------------------" << std::endl;
     /*固定的浮点显示*/
     std::cout.setf(std::ios::fixed);
     /*setprecision(n) 设显示小数精度为n位*/
@@ -64,6 +130,8 @@ void GcsDisplay::UavStateDisplay(void)
     /*强制显示符号*/
     std::cout.setf(std::ios::showpos);
 
+    std::cout << "----------------------------------[Uav " << c_id << "]------------------------------------" << std::endl;
+    std::cout << "---------------------------------State Info----------------------------------" << std::endl;
     std::cout << "Time:" << std::setw(8) << GetTimePassSec() << " [s] ";
 
     /*是否和飞控建立起连接*/
@@ -218,13 +286,37 @@ void GcsDisplay::UavStateDisplay(void)
                 << std::setw(setw_num) << this->command_reception.y << " [Y]"
                  << std::setw(setw_num) << this->command_reception.z << " [Z]"
                   << std::setw(setw_num) << this->command_reception.yaw << " [Yaw]" << std::endl;
+    std::cout << "--------------------------------Detection Info-------------------------------" << std::endl;
+    std::cout << "Pixel Center : "
+               << std::setw(setw_num) << (this->current_info.drone_status.xmax + this->current_info.drone_status.xmin) / 2 << " [X]"
+                << std::setw(setw_num) << (this->current_info.drone_status.ymax + this->current_info.drone_status.ymin) / 2 << " [Y]" << std::endl;
+    if(this->current_info.drone_status.update)
+        std::cout << "Drone (true ) : ";
+    else
+        std::cout << "Drone (false) : ";
+    std::cout << std::setw(setw_num) << this->current_info.drone_status.raw_pcl_position.x << " [X]"
+               << std::setw(setw_num) << this->current_info.drone_status.raw_pcl_position.y << " [Y]"
+                << std::setw(setw_num) << this->current_info.drone_status.raw_pcl_position.z << " [Z]" << std::endl;
+    std::cout << "     Drone tf : ";
+    std::cout << std::setw(setw_num) << this->current_info.tf_drone_status.pose.position.x << " [X]"
+               << std::setw(setw_num) << this->current_info.tf_drone_status.pose.position.y << " [Y]"
+                << std::setw(setw_num) << this->current_info.tf_drone_status.pose.position.z << " [Z]" << std::endl;
+    if(this->current_info.door_status.update)
+        std::cout << "Door  (true ) : ";
+    else
+        std::cout << "Door  (false) : ";
+    std::cout << std::setw(setw_num) << this->current_info.door_status.raw_pcl_position.x << " [X]"
+               << std::setw(setw_num) << this->current_info.door_status.raw_pcl_position.y << " [Y]"
+                << std::setw(setw_num) << this->current_info.door_status.raw_pcl_position.z << " [Z]"
+                 << std::setw(setw_num) << this->current_info.door_status.yaw * 57.2957795 << " [YAW]" << std::endl;
     std::cout << std::endl;
 
-    CommandUpdateReset();
 }
 
-GcsDisplay::GcsDisplay(const ros::NodeHandle& _nh, double _period) : RosBase(_nh, _period)
+GcsDisplay::GcsDisplay(const ros::NodeHandle& _nh, double _period) : RosBase(_nh, _period), current_info("gcs"), MAX_TRAJECTORY_BUF_SIZE(1000)
 {
+    rviz_trajectory.poses.resize(MAX_TRAJECTORY_BUF_SIZE);
+    rviz_desired_trajectory.poses.resize(MAX_TRAJECTORY_BUF_SIZE);
     Initialize();
 }
 GcsDisplay::~GcsDisplay()
@@ -236,9 +328,30 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "gcs_display");
     ros::NodeHandle nh;
-    GcsDisplay GcsDisplay(nh, 0.1);
+    GcsDisplay GcsDisplay(nh, 1.0);
+    // ros::spin();
+    
+    double ros_rate = 1.0;
+    if(nh.getNamespace() == "/uav1")
+    {
+        ros::NodeHandle nh_temp("~");
+        nh_temp.param<double>("leader_spin_rate/gcs_display", ros_rate, 1.0);
+    }
+    else
+    {
+        ros::NodeHandle nh_temp("~");
+        nh_temp.param<double>("folower_spin_rate/gcs_display", ros_rate, 1.0);
+    }
 
-    ros::spin();
+    std::cout << "-----------------------" << std::endl;
+    std::cout << "ros rate: " << ros_rate << std::endl;
+    ros::Rate loop(ros_rate);
+    while(ros::ok())
+    {
+        ros::spinOnce();
+        GcsDisplay.LoopTaskWithoutVirtual();
+        loop.sleep();
+    }
     return 0;
 
 }

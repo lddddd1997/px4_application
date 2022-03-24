@@ -1,0 +1,228 @@
+<?xml version="1.0" ?>
+<robot name="det_door">
+  <joint name="det_door__link_0_JOINT_0" type="fixed">
+    <parent link="det_door__link_0"/>
+    <child link="det_door__link_0_clone"/>
+    <origin rpy="0  0  0" xyz="2.20407  0.13996 -0.0875"/>
+    <axis xyz="0  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="det_door__link_0_JOINT_1" type="fixed">
+    <parent link="det_door__link_0"/>
+    <child link="det_door__link_1"/>
+    <origin rpy="0  0  0" xyz="-0.19593  0.13996  0.3125"/>
+    <axis xyz="0  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="det_door__link_0_clone_JOINT_2" type="fixed">
+    <parent link="det_door__link_0_clone"/>
+    <child link="det_door__link_1_clone"/>
+    <origin rpy="0  0  0" xyz="0   0   0.4"/>
+    <axis xyz="0  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="det_door__link_1_JOINT_3" type="fixed">
+    <parent link="det_door__link_1"/>
+    <child link="det_door__link_2"/>
+    <origin rpy="0  0  0" xyz="1.2   0    0.45"/>
+    <axis xyz="0  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="det_door__link_2_JOINT_4" type="fixed">
+    <parent link="det_door__link_2"/>
+    <child link="det_door__link_3"/>
+    <origin rpy="0  0  0" xyz="-1.15  0    0.75"/>
+    <axis xyz="0  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="det_door__link_2_JOINT_5" type="fixed">
+    <parent link="det_door__link_2"/>
+    <child link="det_door__link_3_clone"/>
+    <origin rpy="0  0  0" xyz="1.14999  0       0.75"/>
+    <axis xyz="0  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="det_door__link_2_JOINT_6" type="fixed">
+    <parent link="det_door__link_2"/>
+    <child link="det_door__link_2_clone"/>
+    <origin rpy="0  0  0" xyz="0   0   1.5"/>
+    <axis xyz="0  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <link name="det_door__link_0">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+    </inertial>
+    <collision name="det_door__collision">
+      <origin rpy="0  0  0" xyz="-0.19593  0.13996 -0.0875"/>
+      <geometry>
+        <box size="0.2 1 0.2"/>
+      </geometry>
+    </collision>
+    <visual name="det_door__visual">
+      <origin rpy="0  0  0" xyz="-0.19593  0.13996 -0.0875"/>
+      <geometry>
+        <box size="0.2 1 0.2"/>
+      </geometry>
+     <material name="White">
+         <color rgba="0.95 0.95 0.95 1"/>
+     </material>
+    </visual>
+  </link>
+  <link name="det_door__link_0_clone">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+    </inertial>
+    <collision name="det_door__collision">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="0.2 1 0.2"/>
+      </geometry>
+    </collision>
+    <visual name="det_door__visual">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="0.2 1 0.2"/>
+      </geometry>
+     <material name="White">
+         <color rgba="0.95 0.95 0.95 1"/>
+     </material>
+    </visual>
+  </link>
+  <link name="det_door__link_1">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+    </inertial>
+    <collision name="det_door__collision">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="0.2 0.2 0.6"/>
+      </geometry>
+    </collision>
+    <visual name="det_door__visual">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="0.2 0.2 0.6"/>
+      </geometry>
+     <material name="White">
+         <color rgba="0.95 0.95 0.95 1"/>
+     </material>
+    </visual>
+  </link>
+  <link name="det_door__link_1_clone">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+    </inertial>
+    <collision name="det_door__collision">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="0.2 0.2 0.6"/>
+      </geometry>
+    </collision>
+    <visual name="det_door__visual">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="0.2 0.2 0.6"/>
+      </geometry>
+     <material name="White">
+         <color rgba="0.95 0.95 0.95 1"/>
+     </material>
+    </visual>
+  </link>
+  <link name="det_door__link_2">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+    </inertial>
+    <collision name="det_door__collision">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="2.6 0.2 0.3"/>
+      </geometry>
+    </collision>
+    <visual name="det_door__visual">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="2.6 0.2 0.3"/>
+      </geometry>
+     <material name="White">
+         <color rgba="0.95 0.95 0.95 1"/>
+     </material>
+    </visual>
+  </link>
+  <link name="det_door__link_2_clone">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+    </inertial>
+    <collision name="det_door__collision">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="2.6 0.2 0.3"/>
+      </geometry>
+    </collision>
+    <visual name="det_door__visual">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="2.6 0.2 0.3"/>
+      </geometry>
+     <material name="White">
+         <color rgba="0.9 0.9 0.9 1"/>
+     </material>
+    </visual>
+  </link>
+  <link name="det_door__link_3">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+    </inertial>
+    <collision name="det_door__collision">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="0.3 0.2 1.2"/>
+      </geometry>
+    </collision>
+    <visual name="det_door__visual">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="0.3 0.2 1.2"/>
+      </geometry>
+     <material name="White">
+         <color rgba="0.95 0.95 0.95 1"/>
+     </material>
+    </visual>
+  </link>
+  <link name="det_door__link_3_clone">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+    </inertial>
+    <collision name="det_door__collision">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="0.3 0.2 1.2"/>
+      </geometry>
+    </collision>
+    <visual name="det_door__visual">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="0.3 0.2 1.2"/>
+      </geometry>
+     <material name="White">
+         <color rgba="0.95 0.95 0.95 1"/>
+     </material>
+    </visual>
+  </link>
+</robot>

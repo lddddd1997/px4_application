@@ -1,0 +1,9 @@
+<launch>
+    <arg name="uav_id" default="0"/>
+    <arg name="namespace" value="$(eval 'uav' + str(arg('uav_id')))"/>
+    <node pkg="px4_application" type="rospy_yolo_detector_realsense.py" name="rospy_yolo_detector_realsense" output="screen" ns="$(arg namespace)">
+    </node>
+    <node pkg="px4_application" type="drone_realsense_yolo" name="drone_realsense_yolo" output="screen"  ns="$(arg namespace)">
+    </node>
+
+</launch>

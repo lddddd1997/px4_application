@@ -1,5 +1,9 @@
 <launch>
     <arg name="uav_id" default="0"/>
     <arg name="namespace" value="$(eval 'uav' + str(arg('uav_id')))"/>
-    <node pkg="px4_application" type="gcs_display" name="gcs_display" output="screen"  ns="$(arg namespace)"/>
+    <node pkg="px4_application" type="gcs_display" name="gcs_display" output="screen"  ns="$(arg namespace)">
+        <rosparam command="load" file="$(find px4_application)/config/gcs_config/gcs_display.yaml" />
+        <rosparam command="load" file="$(find px4_application)/config/rate_config/spin_rate_config.yaml" />
+        <param name="uav_id" type="int" value="$(arg uav_id)" />
+    </node>
 </launch>

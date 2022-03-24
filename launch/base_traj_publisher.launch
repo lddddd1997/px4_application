@@ -1,0 +1,13 @@
+<launch>
+    <arg name="uav_id" default="0"/>
+    <arg name="namespace" value="$(eval 'uav' + str(arg('uav_id')))"/>
+    <node pkg="px4_application" type="traj_publisher" name="traj_publisher" output="screen" ns="$(arg namespace)">
+        <rosparam command="load" file="$(find px4_application)/config/controller_config/pid_controller.yaml" />
+        <rosparam command="load" file="$(find px4_application)/config/rate_config/spin_rate_config.yaml" />
+	</node>
+        
+    <!-- <arg name="visualization" default="true"/>
+	<group if="$(arg visualization)">
+		<node type="rviz" name="rviz" pkg="rviz" args="-d $(find px4_application)/config/rviz_config/visual_formation.rviz" />
+    </group> -->
+</launch>

@@ -7,6 +7,12 @@ project(px4_application)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+find_package(realsense2 REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(PCL REQUIRED)
+find_package(Eigen3 REQUIRED)
+link_directories(${OpenCV_LIBRARY_DIRS})
+link_directories(${PCL_LIBRARY_DIRS}) 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   mavros
@@ -14,11 +20,14 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   nav_msgs
   roscpp
+  rospy
   sensor_msgs
   std_msgs
   std_srvs
   tf2_eigen
   tf2_ros
+  cv_bridge
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -60,6 +69,14 @@ find_package(catkin REQUIRED COMPONENTS
    UavCommand.msg
    UavStatus.msg
    TargetStatus.msg
+   BoundingBox.msg
+   BoundingBoxes.msg
+   BoundaryCondition.msg
+   BoundaryConditions.msg
+   FlatTarget.msg
+   LeaderStatus.msg
+   RealsenseTarget.msg
+   RealsenseTargets.msg
  )
 
 ## Generate services in the 'srv' folder
@@ -91,10 +108,7 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add a build_depend and a exec_depend tag for "dynamic_reconfigure"
 ## * In this file (CMakeLists.txt):
 ##   * add "dynamic_reconfigure" to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * uncomment the "generate_dynamic_reconfigure_options" section below
-##     and list every .cfg file to be processed
-
+##     find_package${OpenCV_INCLUDE_DIRS}
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 # generate_dynamic_reconfigure_options(
 #   cfg/DynReconf1.cfg
@@ -126,6 +140,11 @@ catkin_package(
 include_directories(
  include
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  ${realsense_INCLUDE_DIR}
+  src/lib
 )
 
 ## Declare a C++ library
@@ -142,11 +161,26 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/px4_application_node.cpp)
+
  add_executable(gcs_setting src/gcs/gcs_setting.cpp)
  add_executable(gcs_display src/gcs/gcs_display.cpp)
+
  add_executable(uav_control src/uav/uav_control.cpp)
- add_executable(uav_collaboration src/application/uav_collaboration.cpp)
- add_executable(uav_mission_template src/application/uav_mission_template.cpp)
+ add_executable(uav_estimator src/uav/uav_estimator.cpp)
+
+ add_executable(traj_publisher src/pub/traj_publisher.cpp)
+ add_executable(form_publisher src/pub/form_publisher.cpp)
+
+ add_executable(door_detection src/detection/door_detection.cpp)
+# add_executable(realsense2_test src/detection/realsense2_test.cpp)
+ add_executable(realsense2_processing src/detection/realsense2_processing.cpp)
+ add_executable(drone_sub_yolo_info src/detection/drone_sub_yolo_info.cpp)
+ add_executable(drone_realsense_yolo src/detection/drone_realsense_yolo.cpp)
+
+# add_executable(app_collaboration src/application/app_collaboration.cpp)
+# add_executable(app_mission_template src/application/app_mission_template.cpp)
+ add_executable(app_visual_formation src/application/app_visual_formation.cpp)
+ 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -168,7 +202,7 @@ include_directories(
  add_dependencies(gcs_setting ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
  target_link_libraries(gcs_display
-   ${catkin_LIBRARIES}
+   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
  )
  add_dependencies(gcs_display ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
@@ -176,16 +210,61 @@ include_directories(
    ${catkin_LIBRARIES}
  )
  add_dependencies(uav_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
- target_link_libraries(uav_collaboration
+ 
+ target_link_libraries(uav_estimator
    ${catkin_LIBRARIES}
  )
- add_dependencies(uav_collaboration ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ add_dependencies(uav_estimator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(uav_mission_template
+ target_link_libraries(traj_publisher
    ${catkin_LIBRARIES}
  )
- add_dependencies(uav_mission_template ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ add_dependencies(traj_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+ target_link_libraries(form_publisher
+   ${catkin_LIBRARIES}
+ )
+ add_dependencies(form_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+ target_link_libraries(door_detection
+   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
+ )
+ add_dependencies(door_detection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+# target_link_libraries(realsense2_test
+#   ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${realsense2_LIBRARY} ${OpenCV_LIBRARIES}
+# )
+# add_dependencies(realsense2_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+ target_link_libraries(realsense2_processing
+   ${catkin_LIBRARIES} ${realsense2_LIBRARY} ${OpenCV_LIBRARIES}
+ )
+ add_dependencies(realsense2_processing ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+ target_link_libraries(drone_sub_yolo_info
+   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
+ )
+ add_dependencies(drone_sub_yolo_info ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+ target_link_libraries(drone_realsense_yolo
+   ${catkin_LIBRARIES}
+ )
+ add_dependencies(drone_realsense_yolo ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+# target_link_libraries(app_collaboration
+#   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
+# )
+# add_dependencies(app_collaboration ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+# target_link_libraries(app_mission_template
+#   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
+# )
+# add_dependencies(app_mission_template ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+ target_link_libraries(app_visual_formation
+   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
+ )
+ add_dependencies(app_visual_formation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 #############
 ## Install ##
 #############

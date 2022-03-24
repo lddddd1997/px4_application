@@ -1,0 +1,106 @@
+<launch>
+    <!-- visual_formation1.world -->
+    <group ns="door1">
+        <arg name="model" default="$(find px4_application)/simulation/models/all_doors/door1/door1.urdf"/>
+        <arg name="gui" default="false" />
+        <param name="robot_description" textfile="$(arg model)" />
+        <param name="use_gui" value="$(arg gui)"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <node pkg="tf" type="static_transform_publisher" name="tf_door"
+                args="9.611 -1.011 0 1.296 0 0 world door1__link_0 1"/>
+    </group>
+
+    <group ns="door2">
+        <arg name="model" default="$(find px4_application)/simulation/models/all_doors/door2/door2.urdf"/>
+        <arg name="gui" default="false" />
+        <param name="robot_description" textfile="$(arg model)" />
+        <param name="use_gui" value="$(arg gui)"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <node pkg="tf" type="static_transform_publisher" name="tf_door"
+                args="27.000 6.975 0 2.787 0 0 world door2__link_0 1"/>
+    </group>
+
+    <group ns="door3">
+        <arg name="model" default="$(find px4_application)/simulation/models/all_doors/door3/door3.urdf"/>
+        <arg name="gui" default="false" />
+        <param name="robot_description" textfile="$(arg model)" />
+        <param name="use_gui" value="$(arg gui)"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <node pkg="tf" type="static_transform_publisher" name="tf_door"
+                args="20.917 27.802 0 0.970 0 0 world door3__link_0 1"/>
+    </group>
+
+    <group ns="door4">
+        <arg name="model" default="$(find px4_application)/simulation/models/all_doors/door4/door4.urdf"/>
+        <arg name="gui" default="false" />
+        <param name="robot_description" textfile="$(arg model)" />
+        <param name="use_gui" value="$(arg gui)"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <node pkg="tf" type="static_transform_publisher" name="tf_door"
+                args="3.782 23.340 0 2.626 0 0 world door4__link_0 1"/>
+    </group>
+
+
+    <!-- visual_formation_sim.world -->
+    <!-- <group ns="door1">
+        <arg name="model" default="$(find px4_application)/simulation/models/all_doors/door1/door1.urdf"/>
+        <arg name="gui" default="false" />
+        <param name="robot_description" textfile="$(arg model)" />
+        <param name="use_gui" value="$(arg gui)"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <node pkg="tf" type="static_transform_publisher" name="tf_door"
+                args="8.583 0.649 0 1.281 0 0 world door1__link_0 1"/>
+    </group>
+
+    <group ns="door2">
+        <arg name="model" default="$(find px4_application)/simulation/models/all_doors/door2/door2.urdf"/>
+        <arg name="gui" default="false" />
+        <param name="robot_description" textfile="$(arg model)" />
+        <param name="use_gui" value="$(arg gui)"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <node pkg="tf" type="static_transform_publisher" name="tf_door"
+                args="23.840 5.337 0 2.225 0 0 world door2__link_0 1"/>
+    </group>
+
+    <group ns="door3">
+        <arg name="model" default="$(find px4_application)/simulation/models/all_doors/door3/door3.urdf"/>
+        <arg name="gui" default="false" />
+        <param name="robot_description" textfile="$(arg model)" />
+        <param name="use_gui" value="$(arg gui)"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <node pkg="tf" type="static_transform_publisher" name="tf_door"
+                args="22.963 23.758 0 0.671 0 0 world door3__link_0 1"/>
+    </group>
+
+    <group ns="door4">
+        <arg name="model" default="$(find px4_application)/simulation/models/all_doors/door4/door4.urdf"/>
+        <arg name="gui" default="false" />
+        <param name="robot_description" textfile="$(arg model)" />
+        <param name="use_gui" value="$(arg gui)"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <node pkg="tf" type="static_transform_publisher" name="tf_door"
+                args="7.733 27.834 0 1.694 0 0 world door4__link_0 1"/>
+    </group>
+
+    <group ns="door5">
+        <arg name="model" default="$(find px4_application)/simulation/models/all_doors/door5/door5.urdf"/>
+        <arg name="gui" default="false" />
+        <param name="robot_description" textfile="$(arg model)" />
+        <param name="use_gui" value="$(arg gui)"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <node pkg="tf" type="static_transform_publisher" name="tf_door"
+                args="-0.976 14.019 0 -0.044 0 0 world door5__link_0 1"/>
+    </group> -->
+
+    <group ns="det_door">
+        <arg name="model" default="$(find px4_application)/simulation/models/all_doors/det_door/det_door.urdf"/>
+        <arg name="gui" default="false" />
+        <param name="robot_description" textfile="$(arg model)" />
+        <param name="use_gui" value="$(arg gui)"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <node pkg="tf" type="static_transform_publisher" name="tf_door"
+                args="1.1 1.5 0 3.14 0 -1.57 det_door_central_link det_door__link_0 1"/> <!--x y z yaw pitch roll-->
+    </group>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find px4_application)/config/rviz_config/visual_formation_sim.rviz" /> />
+</launch>
