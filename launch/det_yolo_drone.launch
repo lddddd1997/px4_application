@@ -2,6 +2,7 @@
     <arg name="uav_id" default="0"/>
     <arg name="namespace" value="$(eval 'uav' + str(arg('uav_id')))"/>
     <node pkg="px4_application" type="rospy_yolo_detector_sub_topic.py" name="rospy_yolo_detector_sub_topic" output="screen" ns="$(arg namespace)">
+        <param name="uav_id" type="int" value="$(arg uav_id)" />
     </node>
     <node pkg="px4_application" type="drone_sub_yolo_info" name="drone_sub_yolo_info" output="screen"  ns="$(arg namespace)">
     </node>

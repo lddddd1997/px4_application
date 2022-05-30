@@ -102,5 +102,6 @@
                 args="1.1 1.5 0 3.14 0 -1.57 det_door_central_link det_door__link_0 1"/> <!--x y z yaw pitch roll-->
     </group>
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find px4_application)/config/rviz_config/visual_formation_sim.rviz" /> />
+    <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find px4_application)/config/rviz_config/visual_formation_sim.rviz" /> /> -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find px4_application)/config/rviz_config/muti_comm_formation.rviz" /> />
 </launch>

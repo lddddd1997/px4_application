@@ -63,7 +63,7 @@
         <arg name="ID" value="2"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn_sdf.launch">
-            <arg name="x" value="-3"/>
+            <arg name="x" value="-2"/>
             <arg name="y" value="0"/>
             <arg name="z" value="0"/>
             <arg name="R" value="0"/>

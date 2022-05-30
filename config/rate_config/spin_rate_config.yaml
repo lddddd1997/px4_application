@@ -16,10 +16,10 @@ leader_spin_rate:
   visual_formation: 20
   traj_publisher: 50
   door_detection: 50
-  gcs_display: 1
+  gcs_display: 10
 
 folower_spin_rate:
   uav_control: 50
   visual_formation: 20
   form_publisher: 50
-  gcs_display: 1
+  gcs_display: 10

@@ -66,6 +66,8 @@ private:
     geometry_msgs::Vector3 takeoff_absolute_position_param;    //绝对起飞位置
     double takeoff_relative_height_param;    //相对起飞高度
     bool takeoff_id;    //false绝对起飞 true相对起飞
+    // ros::NodeHandle nh_private;
+    // RvizVisualization<geometry_msgs::Vector3> acc_visualization;
 };
 
 class Mission : public States

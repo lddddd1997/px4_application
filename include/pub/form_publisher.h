@@ -15,6 +15,8 @@
 #include "trajectory_utilities/trajectory_utils.hpp"
 #include "gcs/gcs_display.h"
 
+Eigen::Vector3d FormationOutput(const OtherSubscriber& total_info, int uav_id);
+
 class FormationPublisher : public RosBase
 {
 public:
