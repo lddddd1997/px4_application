@@ -189,7 +189,7 @@ def Detect(image):
         im0 = annotator.result()
         if view_img:
             im0 = im0[:, :, ::-1]
-            cv2.imshow("drone detection", im0)
+            cv2.imshow("drone" + str(uav_id) + "detection", im0)
             cv2.waitKey(1)  # 1 millisecond
 
         # Save results (image with detections)
@@ -300,7 +300,8 @@ if __name__ == "__main__":
 
 
     rospy.init_node('yolo_detector_sub_topic')
-    image_topic = "/typhoon_h480_2/depth_camera/rgb/image_raw"
+    uav_id = rospy.get_param("~uav_id", 9)
+    image_topic = "/typhoon_h480_" + str(uav_id) + "/depth_camera/rgb/image_raw"
     # image_topic = "realsense2/color_image"
     rospy.Subscriber(image_topic, Image, ImageCallback, queue_size=1, buff_size=52428800)
     

@@ -1502,7 +1502,7 @@
 
   <include>
 	  <uri>model://depth_camera_new</uri>
-	  <pose>0.3 0 0.0 0 0 0</pose>
+	  <pose>0.2 0 -0.2 0 0 0</pose>
 	</include>
 	<joint name="depth_camera_new_joint" type="fixed">
 	  <child>depth_camera_new::link</child>

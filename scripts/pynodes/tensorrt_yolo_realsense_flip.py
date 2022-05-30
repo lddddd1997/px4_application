@@ -220,7 +220,7 @@ class YoLov5TRT(object):
                     if(dist_to_pixel == 0): # 如果深度估计有问题,则忽略该目标
                         continue
                     # point_3d = rs.rs2_deproject_pixel_to_point(depth_intr, [real_pixel_x, real_pixel_y], dist_to_pixel) # 使用real_pixel_x这个可能导致xy波动
-                    point_3d = rs.rs2_deproject_pixel_to_point(depth_intr, [pixel_x, pixel_x], dist_to_pixel)
+                    point_3d = rs.rs2_deproject_pixel_to_point(depth_intr, [pixel_x, pixel_y], dist_to_pixel)
                     point_3d[0] = -point_3d[0] # 相机坐标系翻转
                     point_3d[1] = -point_3d[1]
                     rs_tg.position_from_realsense = Vector3(point_3d[0], point_3d[1], point_3d[2])
@@ -505,7 +505,7 @@ if __name__ == "__main__":
 
      # load custom plugin and engine
     PLUGIN_LIBRARY = "/home/amov/ld_ws/px4_ws/src/px4_application/src/tensorrt_yolo/yolov5/build/libmyplugins.so"
-    engine_file_path = "/home/amov/ld_ws/px4_ws/src/px4_application/src/tensorrt_yolo/yolov5/build/drone2_28.engine"
+    engine_file_path = "/home/amov/ld_ws/px4_ws/src/px4_application/src/tensorrt_yolo/yolov5/build/drone4_22.engine"
     ctypes.CDLL(PLUGIN_LIBRARY)
     yolov5_wrapper = YoLov5TRT(engine_file_path)
     print('batch size is', yolov5_wrapper.batch_size)
