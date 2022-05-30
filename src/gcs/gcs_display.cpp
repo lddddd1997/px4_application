@@ -313,7 +313,7 @@ void GcsDisplay::UavStateDisplay(void)
 
 }
 
-GcsDisplay::GcsDisplay(const ros::NodeHandle& _nh, double _period) : RosBase(_nh, _period), current_info("gcs"), MAX_TRAJECTORY_BUF_SIZE(1000)
+GcsDisplay::GcsDisplay(const ros::NodeHandle& _nh, double _period) : RosBase(_nh, _period), current_info("gcs"), MAX_TRAJECTORY_BUF_SIZE(3000)
 {
     rviz_trajectory.poses.resize(MAX_TRAJECTORY_BUF_SIZE);
     rviz_desired_trajectory.poses.resize(MAX_TRAJECTORY_BUF_SIZE);

@@ -1,5 +1,108 @@
 #include "pub/form_publisher.h"
 
+
+Eigen::Vector3d FormationOutput(const OtherSubscriber& total_info, int uav_id)
+{
+    Eigen::Vector3d vel_deisred;
+    vel_deisred.setZero();
+    Eigen::Vector3d own_vel;
+    own_vel = TypeTransform::RosMsg2Eigen(total_info.uav_status[uav_id].local_velocity);
+    Eigen::Vector3d own_pos;
+    own_pos = TypeTransform::RosMsg2Eigen(total_info.uav_status[uav_id].local_position);
+    // vel_deisred += 0.5 * (TypeTransform::RosMsg2Eigen(total_info.uav_status[OtherSubscriber::uav_1].local_velocity) - own_vel);
+    vel_deisred += 1.0 * (TypeTransform::RosMsg2Eigen(total_info.uav_status[OtherSubscriber::uav_1].local_velocity) - own_vel);
+    for(int i = 1; i < 4; i++)
+    {
+        // vel_deisred += 0.5 * (TypeTransform::RosMsg2Eigen(total_info.uav_status[i].local_velocity) - own_vel);
+        vel_deisred += 0.1 * (TypeTransform::RosMsg2Eigen(total_info.uav_status[i].local_velocity) - own_vel);
+    }
+
+    double leader_yaw = total_info.uav_status[OtherSubscriber::uav_1].attitude_angle.z;
+    double sin_yaw = sin(leader_yaw);
+    double cos_yaw = cos(leader_yaw);
+
+    //      1
+    //      2
+    //      3
+    //      4
+    // Eigen::Vector3d deisred_position;
+    // double offset = uav_id * 2.0;
+    // deisred_position[0] = total_info.uav_status[OtherSubscriber::uav_1].local_position.x + offset - offset * cos_yaw;
+    // deisred_position[1] = total_info.uav_status[OtherSubscriber::uav_1].local_position.y - offset * sin_yaw;
+    // deisred_position[2] = total_info.uav_status[OtherSubscriber::uav_1].local_position.z;
+    // // vel_deisred += 5.0 * (deisred_position - own_pos);
+    // vel_deisred += 5.0 * (deisred_position - own_pos);
+
+    // for(int i = 1; i < 4; i++)
+    // {
+    //     double offset_follower = (uav_id - i) * 2.0;
+    //     // vel_deisred[0] += 0.5 * (offset_follower + total_info.uav_status[i].local_position.x - own_pos[0] + (i - uav_id) * 2.0 * cos_yaw);
+    //     // vel_deisred[1] += 0.5 * (total_info.uav_status[i].local_position.y - own_pos[1] + (i - uav_id) * 2.0 * sin_yaw);
+    //     vel_deisred[0] += 0.1 * (offset_follower + total_info.uav_status[i].local_position.x - own_pos[0] + (i - uav_id) * 2.0 * cos_yaw);
+    //     vel_deisred[1] += 0.1 * (total_info.uav_status[i].local_position.y - own_pos[1] + (i - uav_id) * 2.0 * sin_yaw);
+    // }
+
+
+    //          1
+    //      3   2   4
+    if(uav_id == OtherSubscriber::uav_2) 
+    {
+        double offset_follower = (uav_id - OtherSubscriber::uav_3) * 2.0;
+        vel_deisred[0] += 0.1 * (offset_follower + total_info.uav_status[OtherSubscriber::uav_3].local_position.x - own_pos[0] - 2.0 * sin_yaw);
+        vel_deisred[1] += 0.1 * (total_info.uav_status[OtherSubscriber::uav_3].local_position.y - own_pos[1] + 2.0 * cos_yaw + 2.0 * cos_yaw);
+        offset_follower = (uav_id - OtherSubscriber::uav_4) * 2.0;
+        vel_deisred[0] += 0.1 * (offset_follower + total_info.uav_status[OtherSubscriber::uav_4].local_position.x - own_pos[0] + 2.0 * sin_yaw);
+        vel_deisred[1] += 0.1 * (total_info.uav_status[OtherSubscriber::uav_4].local_position.y - own_pos[1] - 2.0 * cos_yaw - 2.0 * cos_yaw);
+
+        Eigen::Vector3d deisred_position;
+        deisred_position[0] = total_info.uav_status[OtherSubscriber::uav_1].local_position.x + 2.0 - 2.0 * cos_yaw;
+        deisred_position[1] = total_info.uav_status[OtherSubscriber::uav_1].local_position.y - 2.0 * sin_yaw;
+        deisred_position[2] = total_info.uav_status[OtherSubscriber::uav_1].local_position.z;
+        vel_deisred += 5.0 * (deisred_position - own_pos);
+    }
+    else if(uav_id == OtherSubscriber::uav_3)
+    {
+        double offset_follower = (uav_id - OtherSubscriber::uav_2) * 2.0;
+        vel_deisred[0] += 0.1 * (offset_follower + total_info.uav_status[OtherSubscriber::uav_2].local_position.x - own_pos[0] + 2.0 * sin_yaw);
+        vel_deisred[1] += 0.1 * (total_info.uav_status[OtherSubscriber::uav_2].local_position.y - own_pos[1] - 2.0 * cos_yaw - 2.0 * cos_yaw);
+        offset_follower = (uav_id - OtherSubscriber::uav_4) * 2.0;
+        vel_deisred[0] += 0.1 * (offset_follower + total_info.uav_status[OtherSubscriber::uav_4].local_position.x - own_pos[0]  + 4.0 * sin_yaw);
+        vel_deisred[1] += 0.1 * (total_info.uav_status[OtherSubscriber::uav_4].local_position.y - own_pos[1] - 4.0 * cos_yaw - 4.0 * cos_yaw);
+
+        Eigen::Vector3d deisred_position;
+        deisred_position[0] = total_info.uav_status[OtherSubscriber::uav_1].local_position.x + 4.0 - 2.0 * cos_yaw - 2.0 * sin_yaw;
+        deisred_position[1] = total_info.uav_status[OtherSubscriber::uav_1].local_position.y - 2.0 * sin_yaw + 2.0 * cos_yaw;
+        deisred_position[2] = total_info.uav_status[OtherSubscriber::uav_1].local_position.z;
+        vel_deisred += 5.0 * (deisred_position - own_pos);
+    }
+    else
+    {
+        double offset_follower = (uav_id - OtherSubscriber::uav_2) * 2.0;
+        vel_deisred[0] += 0.1 * (offset_follower + total_info.uav_status[OtherSubscriber::uav_2].local_position.x - own_pos[0] - 2.0 * sin_yaw);
+        vel_deisred[1] += 0.1 * (total_info.uav_status[OtherSubscriber::uav_2].local_position.y - own_pos[1] + 2.0 * cos_yaw + 2.0 * cos_yaw);
+        offset_follower = (uav_id - OtherSubscriber::uav_3) * 2.0;
+        vel_deisred[0] += 0.1 * (offset_follower + total_info.uav_status[OtherSubscriber::uav_3].local_position.x - own_pos[0] - 4.0 * sin_yaw);
+        vel_deisred[1] += 0.1 * (total_info.uav_status[OtherSubscriber::uav_3].local_position.y - own_pos[1] + 4.0 * cos_yaw + 4.0 * cos_yaw);
+
+        Eigen::Vector3d deisred_position;
+        deisred_position[0] = total_info.uav_status[OtherSubscriber::uav_1].local_position.x + 6.0 - 2.0 * cos_yaw + 2.0 * sin_yaw;
+        deisred_position[1] = total_info.uav_status[OtherSubscriber::uav_1].local_position.y - 2.0 * sin_yaw - 2.0 * cos_yaw;
+        deisred_position[2] = total_info.uav_status[OtherSubscriber::uav_1].local_position.z;
+        vel_deisred += 5.0 * (deisred_position - own_pos);
+    }
+    
+    if(vel_deisred[0] > 2.0)
+        vel_deisred[0] = 2.0;
+    if(vel_deisred[0] < -2.0)
+        vel_deisred[0] = -2.0;
+    if(vel_deisred[1] > 2.0)
+        vel_deisred[1] = 2.0;
+    if(vel_deisred[1] < -2.0)
+        vel_deisred[1] = -2.0;
+
+    return vel_deisred;
+}
+
 // void FormationPublisher::LeaderPositionCallback(const geometry_msgs::PoseStamped::ConstPtr& _msg)
 // {
 //     this->leader_position.x = _msg->pose.position.x + 2.0; // 放置偏差
