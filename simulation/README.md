@@ -1,0 +1,5 @@
+将该路径下的models的depth_camera_new lawn_plane door_2_1.2等模型文件拷贝到px4源码的models文件夹；
+typhoon_h480不能替换px4源码models里面的模型，否则会导致make px4_sitl gazebo_typhoon_h480错误，对比typhoon_h480.sdf增加深度相机模型到px4源码models文件夹的typhoon_h480.sdf。
+
+
+将该路径下的worlds文件夹的世界模型拷贝至px4源码的worlds文件夹；
