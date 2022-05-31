@@ -8,7 +8,7 @@
 
   * 参考**px4_application/simulation**路径下的README.md配置代码运行所需的gazebo模型
   * 在**px4_application/config/detection_config/door_detection.yaml**中配置相机内参文件路径
-  * 将**px4_application/scripts/pynodes/rospy_yolo_detector_sub_topic.py**赋予可执行权限，并且在文件中更改yolov5的路径以及模型文件路径
+  * 将**px4_application/scripts/pynodes/rospy_yolo_detector_sub_topic.py**赋予可执行权限，并且在文件中更改yolov5的路径以及模型文件路径，模型文件及数据集在`https://github.com/lddddd1997/uav_datasets`地址
 
 * 编译
 
