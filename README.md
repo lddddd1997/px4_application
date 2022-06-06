@@ -1,13 +1,9 @@
 # px4_application
 固件版本：`1.11.3`
 
-![formation_crossing_obstacles](https://github.com/lddddd1997/Videos/blob/main/formation_crossing_obstacles/gazebo_simulation/formation_crossing_obstacles/sim_visual_form_4doors.gif)
+![sim_formation_crossing_obstacles](https://github.com/lddddd1997/Videos/blob/main/formation_crossing_obstacles/gazebo_simulation/formation_crossing_obstacles/sim_visual_form_4doors.gif)
 
-
-
-----------------
-
-<img align="right" width="40%" src="https://github.com/lddddd1997/Videos/blob/main/formation_crossing_obstacles/gazebo_simulation/formation_crossing_obstacles/sim_visual_form_4doors.gif">
+![exp_formation_crossing_obstacles](https://github.com/lddddd1997/Videos/blob/main/formation_crossing_obstacles/flight_test/formation_crossing_obstacles/visual_form_crossing1.gif)
 
 ## 仿真说明
 * 准备
