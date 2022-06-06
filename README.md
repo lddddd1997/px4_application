@@ -3,7 +3,7 @@
 
 ![sim_formation_crossing_obstacles](https://github.com/lddddd1997/Videos/blob/main/formation_crossing_obstacles/gazebo_simulation/formation_crossing_obstacles/sim_visual_form_4doors.gif)
 
-![exp_formation_crossing_obstacles](https://github.com/lddddd1997/Videos/blob/main/formation_crossing_obstacles/flight_test/formation_crossing_obstacles/visual_form_crossing1.gif)
+![exp_formation_crossing_obstacles](https://github.com/lddddd1997/Videos/blob/main/formation_crossing_obstacles/flight_test/formation_crossing_obstacles/visual_form_crossing1.gif)![leader](https://github.com/lddddd1997/Videos/blob/main/formation_crossing_obstacles/flight_test/formation_crossing_obstacles/visual_form_crossing2.gif)![follower](https://github.com/lddddd1997/Videos/blob/main/formation_crossing_obstacles/flight_test/formation_crossing_obstacles/visual_form_crossing3.gif)
 
 ## 仿真说明
 * 准备
